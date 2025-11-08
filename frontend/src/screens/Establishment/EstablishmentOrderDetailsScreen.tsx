@@ -16,7 +16,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import {
-  EstablishmentAuthStackParamList,
   EstablishmentStackParamList,
 } from "../../navigation/EstablishmentNavigator";
 import {
@@ -71,7 +70,6 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     warning: "#FF9500",
   };
 
-  // Função para buscar detalhes do pedido
   const fetchOrderDetails = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) {
       setIsRefreshing(true);
@@ -110,14 +108,12 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     }
   }, [orderId]);
 
-  // Função para atualizar o status do pedido
   const handleUpdateOrderStatus = async (newStatus: OrderStatus, statusText: string) => {
     try {
       setIsUpdatingStatus(true);
       
       console.log(`🔄 Atualizando pedido ${orderId} para: ${statusText}`);
       
-      // Mapeia o status interno para o texto da API
       const statusMap: { [key: OrderStatus]: string } = {
         "pending": "Aguardando Pagamento",
         "accepted": "Em Separação",
@@ -129,16 +125,12 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
 
       const apiStatus = statusMap[newStatus];
       
-      // Chama a API para atualizar o status
       await EstablishmentPedidoService.updateOrderStatus(orderId, apiStatus);
       
-      // Atualiza o estado local
       setOrderStatus(newStatus);
       
-      // Atualiza os dados do pedido
       await fetchOrderDetails();
       
-      // Mostra mensagem de sucesso
       Alert.alert("Sucesso", `Pedido ${statusText.toLowerCase()} com sucesso!`);
       
     } catch (error: any) {
@@ -149,7 +141,6 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     }
   };
 
-  // Função para confirmar ações importantes
   const confirmAction = (action: string, onConfirm: () => void) => {
     Alert.alert(
       "Confirmação",
@@ -161,12 +152,10 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     );
   };
 
-  // Busca quando a tela é carregada
   useEffect(() => {
     fetchOrderDetails();
   }, [fetchOrderDetails]);
 
-  // Atualização manual
   const handleRefresh = () => {
     fetchOrderDetails(true);
   };
@@ -195,13 +184,11 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     setSelectedPrescription(null);
   };
 
-  // Função para formatar preço
   const formatPrice = (price: string | number): string => {
     const value = typeof price === 'string' ? parseFloat(price.replace(',', '.')) : price;
     return `R$ ${value.toFixed(2).replace('.', ',')}`;
   };
 
-  // Função para calcular subtotal
   const calculateSubtotal = (): number => {
     if (!orderData?.pedido_itens) return 0;
     
@@ -212,7 +199,6 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     }, 0);
   };
 
-  // Função para calcular taxa de entrega
   const calculateDeliveryFee = (): number => {
     if (!orderData?.valor_total) return 0;
     
@@ -308,7 +294,6 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  // Estado de loading
   if (isLoading) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: colors.background }]}>
@@ -320,7 +305,6 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     );
   }
 
-  // Estado de erro (pedido não encontrado)
   if (!orderData) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: colors.background }]}>
@@ -338,12 +322,10 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     );
   }
 
-  // Dados calculados
   const subtotal = calculateSubtotal();
   const deliveryFee = calculateDeliveryFee();
   const total = parseFloat(String(orderData.valor_total).replace(',', '.')) || 0;
 
-  // Dados mockados para receitas (remover quando a API tiver esse campo)
   const mockPrescriptions: Prescription[] = [
     {
       id: "1",
@@ -893,13 +875,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   rejectButton: {
-    // Estilo será aplicado inline
   },
   acceptButton: {
-    // Estilo será aplicado inline
   },
   primaryButton: {
-    // Estilo será aplicado inline
   },
   contactButton: {
     flexDirection: "row",
@@ -928,7 +907,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",

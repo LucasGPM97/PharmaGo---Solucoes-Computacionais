@@ -5,27 +5,11 @@ class CarrinhoController {
   public async getCarrinho(req: Request, res: Response): Promise<Response> {
     try {
       const { idcliente } = req.params;
-
-      // 💡 CORREÇÃO AQUI: Use o método que inclui os itens
-      // Primeiro garante que o carrinho exista, depois busca ele completo.
-      // O seu getOrCreateCarrinho já faz a busca inicial, mas sem os includes.
-
-      // Opção A: Modificar o getOrCreateCarrinho (se você quiser que ele sempre retorne com itens)
-      // Opção B: Chamar o getCarrinhoComItens.
-
-      // Vamos usar uma combinação:
-      // 1. Garante a existência (getOrCreateCarrinho)
       await CarrinhoService.getOrCreateCarrinho(Number(idcliente));
-
-      // 2. Busca o carrinho com os itens para a resposta do GET
-      const carrinhoComItens = await CarrinhoService.getCarrinhoComItens(
+      const carrinhoComItens = await CarrinhoService.getCarrinhoCompleto(
         Number(idcliente)
       );
-
-      // Se o carrinho foi encontrado, mas não tinha itens (null), devolve o objeto base.
-      // O getCarrinhoComItens retorna `any` e pode retornar `null`.
       if (!carrinhoComItens) {
-        // Se for null, retorna a estrutura básica ou um 404
         return res
           .status(404)
           .json({ message: "Carrinho não encontrado após criação." });
@@ -43,12 +27,10 @@ class CarrinhoController {
       const { idcatalogo_produto, quantidade } = req.body;
 
       if (!idcatalogo_produto || !quantidade) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Dados do item (idcatalogo_produto e quantidade) são obrigatórios.",
-          });
+        return res.status(400).json({
+          message:
+            "Dados do item (idcatalogo_produto e quantidade) são obrigatórios.",
+        });
       }
 
       const item = await CarrinhoService.addItemToCarrinho(

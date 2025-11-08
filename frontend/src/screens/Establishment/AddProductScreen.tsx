@@ -40,15 +40,13 @@ interface Presentation {
   cmedPrice: number;
 }
 
-// Tipo para os itens do dropdown
 interface DropdownItem {
   label: string;
   value: string;
 }
 
-// Adaptação dos Tipos de Navegação, assumindo que EstablishmentHomeScreenNavigationProps tem route/params.
 interface EstablishmentHomeScreenNavigationProps {
-  navigation: any; // Substitua por seu tipo de navegação real (ex: NativeStackScreenProps<RootStackParamList, 'ProductRegistrationScreen'>['navigation'])
+  navigation: any; 
   route: any;
 }
 
@@ -109,11 +107,9 @@ const ProductRegistrationScreen: React.FC<
   const [productImage, setProductImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Estados para os dados
-  const [therapeuticClasses, setTherapeuticClasses] = useState<string[]>([]); // Armazena apenas as strings das classes
+  const [therapeuticClasses, setTherapeuticClasses] = useState<string[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // NOVO: Armazenar todos os produtos filtrados pela classe terapêutica
   const [allProducts, setAllProducts] = useState<Produto[]>([]);
   const [laboratories, setLaboratories] = useState<Laboratory[]>([]);
   const [presentations, setPresentations] = useState<Presentation[]>([]);
@@ -163,7 +159,6 @@ const ProductRegistrationScreen: React.FC<
     white: "#FFFFFF",
   };
 
-  // Funções de utilidade (mantidas)
   const normalizeText = (text: string): string => {
     return text
       .normalize("NFD")
@@ -186,15 +181,13 @@ const ProductRegistrationScreen: React.FC<
   useEffect(() => {
     const loadStoreId = async () => {
       try {
-        // getEstablishmentId retorna string | null. Convertemos para número.
         const idString = await getEstablishmentId();
 
         if (idString) {
           const idNumber = parseInt(idString, 10);
-          setStoreId(idNumber); // Armazena o ID numérico correto
+          setStoreId(idNumber); 
           console.log("ID do Estabelecimento carregado:", idNumber);
         } else {
-          // Lidar com o caso de não ter ID (usuário não logado como estabelecimento)
           console.log("Nenhum ID de Estabelecimento encontrado.");
         }
       } catch (error) {
@@ -420,7 +413,6 @@ const ProductRegistrationScreen: React.FC<
       const selectedPresentation = presentations.find(
         (p) => normalizeString(p.name) === cleanedPresentationValue
       );
-      // 🔥 ENCONTRE O PRODUTO COMPLETO PARA PEGAR TARJA E TIPO
       const selectedProduct = allProducts.find(
         (p) =>
           p.nome_comercial === nameValue &&
@@ -435,7 +427,7 @@ const ProductRegistrationScreen: React.FC<
           ? selectedPresentation.msRegistration
           : "",
         cmedPrice: selectedPresentation ? selectedPresentation.cmedPrice : 0,
-        tarja: selectedProduct?.tarja || "", // 🔥 CAPTURA A TARJA
+        tarja: selectedProduct?.tarja || "", 
         tipo_produto: selectedProduct?.tipo_produto || "",
       }));
     } else {
@@ -491,33 +483,15 @@ const ProductRegistrationScreen: React.FC<
     }
   };
 
-  const handleImagePick = async () => {
-    try {
-      const imageUri = await pickImage();
-      if (imageUri) {
-        setProductImage(imageUri);
-        setIsUploading(true);
-        await uploadImage(imageUri, "products", "1");
-        setIsUploading(false);
-        Alert.alert("Sucesso", "Imagem do produto enviada com sucesso!");
-      }
-    } catch (error) {
-      setIsUploading(false);
-      Alert.alert("Erro", "Falha ao enviar imagem do produto");
-      console.error("Erro no upload:", error);
-    }
-  };
-
   const ImagePreviewField: React.FC = () => {
-    // Crie o objeto product para o componente de imagem
     const productForImage = {
       id: selectedProductId?.toString() || "",
       nome_comercial: nameValue || "",
       apresentacao: presentationValue || "",
-      substancia_ativa: "", // Você pode preencher se tiver este dado
+      substancia_ativa: "", 
       tarja: formData.tarja || "",
       tipo_produto: formData.tipo_produto || "",
-      disponibilidade: true, // Sempre true no cadastro
+      disponibilidade: true, 
     };
 
     return (
@@ -945,7 +919,6 @@ const ProductRegistrationScreen: React.FC<
   );
 };
 
-// Estilos (Mantidos)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1111,7 +1084,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontWeight: "500",
   },
-  // NOVOS ESTILOS PARA A VISUALIZAÇÃO DA IMAGEM:
   imagePreviewContainer: {
     height: 200,
     backgroundColor: "#F3F4F6",

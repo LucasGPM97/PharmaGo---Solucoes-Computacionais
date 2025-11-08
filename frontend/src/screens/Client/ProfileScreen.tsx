@@ -19,7 +19,6 @@ type ProfileScreenProps = {
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const userId = "123"; // Substituir por ID do usuário real
 
   const handleLogout = () => {
     clearAuthData();
@@ -30,10 +29,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     });
   };
 
-  const handleImageUpload = (imageUrl: string) => {
-    setProfileImage(imageUrl);
-    Alert.alert("Sucesso", "Imagem de perfil atualizada!");
-  };
   const colors = {
     primary: "#007AFF",
     background: "#FFFFFF",

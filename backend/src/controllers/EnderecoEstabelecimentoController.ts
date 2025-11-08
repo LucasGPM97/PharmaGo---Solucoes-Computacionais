@@ -15,7 +15,6 @@ class EnderecoEstabelecimentoController {
 
   public async findById(req: Request, res: Response): Promise<Response> {
     try {
-      // Correção: Utiliza o ID do endereço do estabelecimento da rota
       const endereco = await EnderecoEstabelecimentoService.getEnderecoById(
         Number(req.params.idendereco_estabelecimento)
       );
@@ -30,13 +29,11 @@ class EnderecoEstabelecimentoController {
     }
   }
 
-  // Renomeado e corrigido para buscar por Estabelecimento
   public async findByEstabelecimento(
     req: Request,
     res: Response
   ): Promise<Response> {
     try {
-      // Correção: Utiliza o ID do estabelecimento da rota
       const enderecos =
         await EnderecoEstabelecimentoService.getAllEnderecosByEstabelecimento(
           Number(req.params.idestabelecimento)
@@ -49,7 +46,6 @@ class EnderecoEstabelecimentoController {
 
   public async update(req: Request, res: Response): Promise<Response> {
     try {
-      // Correção: Utiliza o ID do endereço do estabelecimento da rota
       const [affectedCount] =
         await EnderecoEstabelecimentoService.updateEndereco(
           Number(req.params.idendereco_estabelecimento),
@@ -72,7 +68,6 @@ class EnderecoEstabelecimentoController {
 
   public async delete(req: Request, res: Response): Promise<Response> {
     try {
-      // Correção: Utiliza o ID do endereço do estabelecimento da rota
       const deletedRows = await EnderecoEstabelecimentoService.deleteEndereco(
         Number(req.params.idendereco_estabelecimento)
       );

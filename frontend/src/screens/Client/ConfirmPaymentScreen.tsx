@@ -9,8 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import Header from "../../components/common/Header";
 
 type PaymentMethod = "local" | "card" | "wallet" | "pix";
@@ -21,7 +20,6 @@ const PaymentMethod = ({ navigation }: any) => {
 
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("local");
 
-  const goBack = () => navigation.goBack();
 
   const proceedToNext = () => {
     alert("Avançando para revisão do pedido");
@@ -31,18 +29,6 @@ const PaymentMethod = ({ navigation }: any) => {
       cartTotal: cartTotal,
     });
   };
-
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <TouchableOpacity onPress={goBack} style={styles.backButton}>
-        <MaterialIcons name="arrow-back-ios" size={24} color="#007AFF" />
-      </TouchableOpacity>
-
-      <Text style={styles.headerTitle}>Forma de pagamento</Text>
-
-      <View style={styles.headerSpacer} />
-    </View>
-  );
 
   const renderRadioButton = (isSelected: boolean) => (
     <View

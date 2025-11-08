@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  FlatList,
   RefreshControl,
   ActivityIndicator,
 } from "react-native";
@@ -147,7 +146,6 @@ const ManageOrdersScreen: React.FC = () => {
       setLastUpdate(new Date());
     } catch (error) {
       console.error("❌ Erro ao buscar pedidos:", error);
-      // Mantém dados mockados em caso de erro
       const mockOrders: OrderDisplay[] = [
         {
           id: "123456",

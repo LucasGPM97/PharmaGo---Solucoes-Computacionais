@@ -44,9 +44,7 @@ export interface OrderStats {
 }
 
 export const EstablishmentPedidoService = {
-  /**
-   * Busca todos os pedidos do estabelecimento logado
-   */
+
   async getOrdersByEstablishment(): Promise<Order[]> {
     try {
       console.log(
@@ -102,16 +100,12 @@ export const EstablishmentPedidoService = {
     }
   },
 
-  /**
-   * Busca estatísticas do dia com cálculo real do tempo médio
-   */
   async getTodayStats(): Promise<OrderStats> {
     try {
       console.log("📊 [SERVICE] Buscando estatísticas do dia...");
 
       const orders = await this.getOrdersByEstablishment();
 
-      // Filtra pedidos do dia atual
       const today = new Date().toISOString().split("T")[0];
       console.log("📊 [SERVICE] Data de hoje para filtro:", today);
 
@@ -122,7 +116,6 @@ export const EstablishmentPedidoService = {
 
       console.log("📊 [SERVICE] Pedidos de hoje:", todayOrders.length);
 
-      // 🔥 CALCULA TEMPO MÉDIO PARA PEDIDOS ENTREGUES
       const deliveredOrders = todayOrders.filter(
         (order) => order.status === "Entregue" || order.status === "entregue"
       );
@@ -140,7 +133,6 @@ export const EstablishmentPedidoService = {
             const createdDate = new Date(order.created_at || order.data_pedido);
             const updatedDate = new Date(order.updated_at);
 
-            // Verifica se as datas são válidas
             if (isNaN(createdDate.getTime()) || isNaN(updatedDate.getTime())) {
               console.warn(
                 "📊 [SERVICE] Data inválida no pedido:",
@@ -161,7 +153,7 @@ export const EstablishmentPedidoService = {
               "minutos"
             );
 
-            return total + Math.max(0, timeDiffMinutes); // Garante que não seja negativo
+            return total + Math.max(0, timeDiffMinutes);
           } catch (error) {
             console.error(
               "❌ [SERVICE] Erro ao calcular tempo do pedido",
@@ -185,7 +177,6 @@ export const EstablishmentPedidoService = {
         );
       }
 
-      // Formata o tempo médio
       let averageTimeFormatted = "0 min";
       if (averageTimeMinutes > 0) {
         if (averageTimeMinutes < 60) {
@@ -198,7 +189,6 @@ export const EstablishmentPedidoService = {
         }
       }
 
-      // Calcula revenue
       const revenue = todayOrders.reduce((sum, order) => {
         const valor =
           parseFloat(String(order.valor_total).replace(",", ".")) || 0;
@@ -229,9 +219,6 @@ export const EstablishmentPedidoService = {
     }
   },
 
-  /**
-   * Método auxiliar para calcular tempo de um pedido específico
-   */
   calculateOrderTime(order: Order): number {
     try {
       const createdDate = new Date(order.created_at || order.data_pedido);
@@ -322,7 +309,6 @@ async getOrdersByEstablishmentDashboard(): Promise<Order[]> {
         Array.isArray(response.data) ? response.data.length : "Não é array"
       );
 
-      // 🔥 FILTRAR PEDIDOS BASEADO NO HORÁRIO DE FUNCIONAMENTO
       const filteredOrders = await this.filterOrdersByBusinessHours(response.data);
 
       console.log(
@@ -344,23 +330,17 @@ async getOrdersByEstablishmentDashboard(): Promise<Order[]> {
     }
   },
 
-  /**
-   * Filtra pedidos baseado no horário de funcionamento do estabelecimento
-   */
   async filterOrdersByBusinessHours(orders: Order[]): Promise<Order[]> {
     try {
-      // 🔥 USA A FUNÇÃO EXISTENTE do storeService para verificar se está aberto
       const isOpen = await storeService.getLoggedEstablishmentStatus();
       
       console.log("🏪 [SERVICE] Status do estabelecimento:", isOpen ? "ABERTO" : "FECHADO");
 
       if (!isOpen) {
-        // Se está fechado, não mostra nenhum pedido
         console.log("🚫 [SERVICE] Estabelecimento fechado - nenhum pedido será mostrado");
         return [];
       }
 
-      // Se está aberto, filtra pedidos do dia atual
       const today = new Date().toISOString().split('T')[0];
       const todayOrders = orders.filter(order => {
         try {
@@ -377,7 +357,6 @@ async getOrdersByEstablishmentDashboard(): Promise<Order[]> {
       return todayOrders;
     } catch (error) {
       console.error("❌ [SERVICE] Erro ao verificar horário de funcionamento:", error);
-      // Em caso de erro, retorna todos os pedidos como fallback
       return orders;
     }
   },

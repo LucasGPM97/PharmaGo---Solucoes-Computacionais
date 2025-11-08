@@ -6,13 +6,12 @@ import CatalogoService from "./CatalogoService";
 
 class EstabelecimentoService {
   public async createDefaultOperatingHours(idestabelecimento: number) {
-    // Dias da semana: 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
-    // Usaremos um horário padrão aberto das 08:00 às 18:00
+
     const daysOfWeek = Array.from({ length: 7 }, (_, i) => i);
     const defaultTime = {
       horario_abertura: "08:00:00",
       horario_fechamento: "18:00:00",
-      fechado: false, // Define como aberto por padrão
+      fechado: false, 
     };
 
     const hoursToCreate = daysOfWeek.map((day) => ({
@@ -22,23 +21,19 @@ class EstabelecimentoService {
     }));
 
     try {
-      // Log de quantos registros serão criados, útil para debug
       console.log(
         `Tentando criar ${hoursToCreate.length} horários para o Estabelecimento ID: ${idestabelecimento}`
       );
 
-      // Cria em massa os 7 registros de horário de funcionamento
       await HorarioFuncionamento.bulkCreate(hoursToCreate);
       console.log(
         `Horários de funcionamento padrão criados para o estabelecimento ${idestabelecimento}`
       );
     } catch (error) {
-      // ✅ IMPORTANTE: Se este log aparecer, a mensagem de erro dirá o motivo da falha.
       console.error(
         `ERRO (bulkCreate) ao criar horários para o Estabelecimento ID ${idestabelecimento}:`,
         error
       );
-      // Relança o erro para ser capturado pelo Controller
       throw new Error(
         "Falha ao criar horários de funcionamento padrão: " +
           (error as Error).message
@@ -94,7 +89,6 @@ class EstabelecimentoService {
       senha,
     });
 
-    // ✅ ADICIONADO: Log essencial para confirmar que o ID foi gerado corretamente
     console.log(
       `Estabelecimento criado com sucesso. ID gerado: ${estabelecimento.idestabelecimento}`
     );
@@ -111,7 +105,6 @@ class EstabelecimentoService {
   public async getEstabelecimentoById(
     idestabelecimento: number
   ): Promise<Estabelecimento | null> {
-    // Inclui os horários de funcionamento ao buscar o estabelecimento
     const estabelecimento = await Estabelecimento.findByPk(idestabelecimento, {
       include: [
         {
@@ -128,7 +121,6 @@ class EstabelecimentoService {
   }
 
   public async getAllEstabelecimentos(): Promise<Estabelecimento[]> {
-    // Inclui os horários de funcionamento ao buscar todos os estabelecimentos
     const estabelecimentos = await Estabelecimento.findAll({
       include: [
         {

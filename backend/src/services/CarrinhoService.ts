@@ -4,6 +4,7 @@ import CarrinhoItem from "../models/CarrinhoItem";
 import CatalogoProduto from "../models/CatalogoProduto";
 import Produto from "../models/Produto";
 import Catalogo from "../models/Catalogo";
+import { Estabelecimento } from "../models";
 
 class CarrinhoService {
   public async getOrCreateCarrinho(
@@ -12,7 +13,6 @@ class CarrinhoService {
     try {
       console.log("🔍 Buscando carrinho para cliente:", cliente_idcliente);
 
-      // BUSCA SIMPLES - SEM INCLUDES
       let carrinho = await Carrinho.findOne({
         where: { cliente_idcliente },
       });
@@ -44,13 +44,12 @@ class CarrinhoService {
     try {
       console.log("🔄 Atualizando total do carrinho:", idcarrinho);
 
-      // ✅ USE O ALIAS CORRETO: catalogo_produto (com underline)
       const itens = await CarrinhoItem.findAll({
         where: { carrinho_idcarrinho: idcarrinho },
         include: [
           {
             model: CatalogoProduto,
-            as: "catalogo_produto", // ← ALIAS CORRETO
+            as: "catalogo_produto",
             attributes: ["valor_venda"],
           },
         ],
@@ -59,7 +58,6 @@ class CarrinhoService {
       let total = 0;
 
       for (const item of itens) {
-        // ✅ AGORA deve funcionar - catalogo_produto existe
         const precoUnitario = item.catalogo_produto.valor_venda;
         const quantidade = item.quantidade;
         total += precoUnitario * quantidade;
@@ -95,11 +93,21 @@ class CarrinhoService {
             include: [
               {
                 model: CatalogoProduto,
-                as: "catalogo_produto", // ← ALIAS CORRETO
+                as: "catalogo_produto",
                 include: [
                   {
                     model: Produto,
                     as: "produto",
+                  },
+                  {
+                    model: Catalogo,
+                    as: "catalogo",
+                    include: [
+                      {
+                        model: Estabelecimento,
+                        as: "estabelecimento",
+                      },
+                    ],
                   },
                 ],
               },
@@ -136,7 +144,7 @@ class CarrinhoService {
       include: [
         {
           model: Catalogo,
-          as: "catalogo", // Deve ser o alias da associação CatalogoProduto -> Catalogo
+          as: "catalogo",
           attributes: ["estabelecimento_idestabelecimento"],
         },
       ],
@@ -148,29 +156,21 @@ class CarrinhoService {
       );
     }
 
-    // Acesso aninhado para pegar o FK do estabelecimento
     return catalogoProduto.catalogo.estabelecimento_idestabelecimento;
   }
 
-  /**
-   * Adiciona um item ao carrinho, aplicando a restrição de "um estabelecimento por carrinho".
-   */
   public async addItemToCarrinho(
     idcarrinho: number,
     idcatalogo_produto: number,
     quantidade: number
   ): Promise<CarrinhoItem> {
     try {
-      // 1. VERIFICAÇÃO DE ESTABELECIMENTO
-
-      // a. Busca todos os itens existentes no carrinho
       const itensExistentes = await CarrinhoItem.findAll({
         where: { carrinho_idcarrinho: idcarrinho },
-        limit: 1, // Basta verificar o primeiro item, se existir
+        limit: 1,
       });
 
       if (itensExistentes.length > 0) {
-        // b. Se houver itens, pega o ID do estabelecimento do item existente
         const idCatalogoProdutoExistente =
           itensExistentes[0].catalogo_produto_idcatalogo_produto;
         const estabelecimentoIdExistente =
@@ -178,13 +178,11 @@ class CarrinhoService {
             idCatalogoProdutoExistente
           );
 
-        // c. Pega o ID do estabelecimento do NOVO item
         const estabelecimentoIdNovo =
           await this.getEstabelecimentoIdFromCatalogoProduto(
             idcatalogo_produto
           );
 
-        // d. Compara os IDs
         if (estabelecimentoIdExistente !== estabelecimentoIdNovo) {
           throw new Error(
             "Não é possível adicionar produtos de estabelecimentos diferentes no mesmo carrinho."
@@ -196,7 +194,6 @@ class CarrinhoService {
         );
       }
 
-      // 2. LÓGICA DE INSERÇÃO/ATUALIZAÇÃO
       let item = await CarrinhoItem.findOne({
         where: {
           carrinho_idcarrinho: idcarrinho,
@@ -215,7 +212,6 @@ class CarrinhoService {
         });
       }
 
-      // 3. Atualizar total do carrinho
       await this.updateCarrinhoTotal(idcarrinho);
 
       return item;
@@ -239,7 +235,6 @@ class CarrinhoService {
       },
     });
 
-    // Atualizar total do carrinho se algum item foi removido
     if (deletedRows > 0) {
       await this.updateCarrinhoTotal(idcarrinho);
     }
@@ -263,7 +258,6 @@ class CarrinhoService {
       }
     );
 
-    // Atualizar total do carrinho se a quantidade foi alterada
     if (affectedCount > 0) {
       await this.updateCarrinhoTotal(idcarrinho);
     }
@@ -276,7 +270,6 @@ class CarrinhoService {
       where: { carrinho_idcarrinho: idcarrinho },
     });
 
-    // Atualizar total para 0 se itens foram removidos
     if (deletedRows > 0) {
       await Carrinho.update({ total: 0.0 }, { where: { idcarrinho } });
     }
@@ -284,7 +277,6 @@ class CarrinhoService {
     return deletedRows;
   }
 
-  // No CarrinhoService.ts
   public async getCarrinhoCompleto(cliente_idcliente: number) {
     return await Carrinho.findOne({
       where: { cliente_idcliente: cliente_idcliente },
@@ -297,13 +289,25 @@ class CarrinhoService {
               model: CatalogoProduto,
               as: "catalogo_produto",
               include: [
-                // Inclua o Catalogo (como combinamos na etapa anterior)
-                { model: Catalogo, as: "catalogo" },
-
-                // 🎯 CORREÇÃO DE EAGER LOADING: Incluir o Produto com o Alias
+                {
+                  model: Catalogo,
+                  as: "catalogo",
+                  include: [
+                    {
+                      model: Estabelecimento,
+                      as: "estabelecimento",
+                      attributes: [
+                        "idestabelecimento",
+                        "razao_social",
+                        "taxa_entrega",
+                        "valor_minimo_entrega",
+                      ],
+                    },
+                  ],
+                },
                 {
                   model: Produto,
-                  as: "produto", // 🚨 SUBSTITUA PELO ALIAS REAL!
+                  as: "produto",
                 },
               ],
             },
@@ -313,13 +317,6 @@ class CarrinhoService {
     });
   }
 
-  /**
-   * Busca itens do carrinho com os dados do catálogo/preço, pronto para clonagem.
-   * Este método deve ser usado pelo PedidoService no momento do checkout.
-   */
-  /**
-   * Busca itens do carrinho com os dados do catálogo/preço E o ID do Estabelecimento.
-   */
   public async getItensParaCheckout(
     idcarrinho: number
   ): Promise<CarrinhoItem[]> {
@@ -330,18 +327,12 @@ class CarrinhoService {
           {
             model: CatalogoProduto,
             as: "catalogo_produto",
-            attributes: ["valor_venda"], // Mantemos só o que é do CatalogoProduto
+            attributes: ["valor_venda"],
             include: [
               {
                 model: Catalogo,
-                as: "catalogo", // 👈 Inclusão do Model Catalogo
-                attributes: ["estabelecimento_idestabelecimento"], // 👈 BUSCAMOS O FK AQUI
-                // Poderia incluir Estabelecimento se precisasse do nome/outros dados:
-                // include: [{
-                //   model: Estabelecimento,
-                //   as: "estabelecimento",
-                //   attributes: ['idestabelecimento'],
-                // }]
+                as: "catalogo",
+                attributes: ["estabelecimento_idestabelecimento"],
               },
             ],
           },
@@ -353,23 +344,16 @@ class CarrinhoService {
     }
   }
 
-  /**
-   * Limpa os itens do carrinho e zera o total dentro de uma transação.
-   * @param idcarrinho ID do carrinho a ser limpo.
-   * @param t Objeto de transação do Sequelize.
-   */
   public async limparCarrinhoTransacional(
     idcarrinho: number,
     t: Transaction
   ): Promise<void> {
     try {
-      // 1. Remove todos os itens do carrinho (CarrinhoItem)
       await CarrinhoItem.destroy({
         where: { carrinho_idcarrinho: idcarrinho },
         transaction: t,
       });
 
-      // 2. Zera o total do carrinho principal (Carrinho)
       await Carrinho.update(
         { total: 0.0 },
         { where: { idcarrinho }, transaction: t }

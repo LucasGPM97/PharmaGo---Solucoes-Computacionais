@@ -3,7 +3,6 @@ import PedidoService from "../services/PedidoService";
 
 class PedidoController {
   public async create(req: Request, res: Response): Promise<Response> {
-    // Dados que vêm do Frontend (OrderSummary)
     const {
       idcarrinho,
       cliente_idcliente,
@@ -28,43 +27,35 @@ class PedidoController {
         !endereco_cliente_idendereco_cliente ||
         !forma_pagamento_idforma_pagamento
       ) {
-        // 🚨 LOG 2: Qual campo faltou na validação?
         console.error("❌ ERRO 400: Dados de checkout incompletos.");
         console.log(
           `Faltando Cliente: ${!clienteId}, Carrinho: ${!idcarrinho}, Endereço: ${!endereco_cliente_idendereco_cliente}, Pagamento: ${!forma_pagamento_idforma_pagamento}`
         );
-        // A mensagem de erro será lançada aqui se os campos estiverem faltando no body
-        return res
-          .status(400)
-          .json({
-            message:
-              "Dados de checkout incompletos (cliente, carrinho, endereço ou pagamento).",
-          });
+        return res.status(400).json({
+          message:
+            "Dados de checkout incompletos (cliente, carrinho, endereço ou pagamento).",
+        });
       }
 
       const dadosAdicionais = {
-        // 🎯 CORRIGIDO: Passar o valor diretamente
         endereco_cliente_idendereco_cliente:
           endereco_cliente_idendereco_cliente,
         forma_pagamento_idforma_pagamento: forma_pagamento_idforma_pagamento,
         observacoes,
       };
 
-      // 🚨 Chama a lógica principal de checkout com transação
       const pedido = await PedidoService.criarPedidoDoCarrinho(
         clienteId,
-        idcarrinho, // Não precisa corrigir, já está certo
+        idcarrinho,
         dadosAdicionais
       );
 
-      // Retorna o ID do pedido criado
       return res.status(201).json({
         idpedido: pedido.idpedido,
         message: "Pedido criado e carrinho limpo com sucesso.",
       });
     } catch (error: any) {
       console.error("Erro no checkout:", error.message);
-      // Retorna 400 se o erro for de validação (ex: carrinho vazio, item indisponível)
       return res.status(400).json({ message: error.message });
     }
   }
@@ -104,7 +95,7 @@ class PedidoController {
   public async findByCliente(req: Request, res: Response): Promise<Response> {
     try {
       // --- LOG DE DEBUG NO CONTROLLER ---
-      const paramName = "cliente_idcliente"; // Assumindo que você corrigiu a rota
+      const paramName = "cliente_idcliente";
       const clienteIdParam = req.params[paramName];
       const clienteIdNumber = Number(clienteIdParam);
 

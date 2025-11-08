@@ -100,7 +100,6 @@ const OrdersDashboardScreen: React.FC = () => {
 
     console.log("🔄 [FORMAT] Itens formatados:", items);
 
-    // 🔥 CORREÇÃO: Converter strings para números com segurança
     const subtotal = order.pedido_itens.reduce((sum, item) => {
       const valorUnitario =
         parseFloat(String(item.valor_unitario_venda).replace(",", ".")) || 0;
@@ -108,7 +107,6 @@ const OrdersDashboardScreen: React.FC = () => {
       return sum + valorUnitario * quantidade;
     }, 0);
 
-    // 🔥 CORREÇÃO: Converter valor_total para número
     const valorTotal =
       parseFloat(String(order.valor_total).replace(",", ".")) || 0;
     const deliveryFee = Math.max(0, valorTotal - subtotal);
@@ -120,7 +118,6 @@ const OrdersDashboardScreen: React.FC = () => {
       valor_total_original: order.valor_total,
     });
 
-    // 🔥 CORREÇÃO: Função segura para formatar preços
     const formatPriceSafe = (price: number): string => {
       return `R$ ${price.toFixed(2).replace(".", ",")}`;
     };
@@ -148,7 +145,7 @@ const OrdersDashboardScreen: React.FC = () => {
       console.log("✅ Status da Loja:", isOpen ? "Aberto" : "Fechado");
     } catch (error) {
       console.error("❌ Erro ao buscar status da loja:", error);
-      setStoreOpen(false); // Assume fechado em caso de erro
+      setStoreOpen(false); 
     }
   }, []);
 
@@ -172,14 +169,12 @@ const OrdersDashboardScreen: React.FC = () => {
       const formattedOrders = orders.map(formatOrderForDisplay);
       setOrdersData(formattedOrders);
 
-      // Busca estatísticas
       const todayStats = await EstablishmentPedidoService.getTodayStats();
       setStats(todayStats);
 
       setLastUpdate(new Date());
     } catch (error) {
       console.error("❌ Erro ao buscar pedidos:", error);
-      // Mantém dados mockados em caso de erro (para desenvolvimento)
       const mockOrders: OrderDisplay[] = [
         {
           id: "123456",
@@ -274,7 +269,7 @@ const OrdersDashboardScreen: React.FC = () => {
             backgroundColor: colors.card,
             borderColor: statusConfig.border,
             borderWidth: 2,
-            borderLeftWidth: 6, // Destaque na borda esquerda
+            borderLeftWidth: 6,
           },
         ]}
         onPress={() => handleOrderPress(order.id)}
@@ -423,7 +418,6 @@ const OrdersDashboardScreen: React.FC = () => {
             </Text>
           </View>
 
-          {/* Indicador de Urgência para pedidos novos */}
           {(order.status === "Aguardando Pagamento" ||
             order.status === "Em Separação") && (
             <View style={styles.urgencyIndicator}>
@@ -479,22 +473,6 @@ const OrdersDashboardScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  const LastUpdateIndicator = () => (
-    <View style={[styles.updateIndicator, { backgroundColor: "#e8f4fd" }]}>
-      <Text style={[styles.updateText, { color: colors.textSecondary }]}>
-        Última atualização: {lastUpdate.toLocaleTimeString()}
-      </Text>
-      <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
-        <MaterialIcons
-          name="refresh"
-          size={16}
-          color={colors.primary}
-          style={isRefreshing ? styles.refreshingIcon : undefined}
-        />
-      </TouchableOpacity>
-    </View>
-  );
-
   if (isLoading) {
     return (
       <View
@@ -543,7 +521,6 @@ const OrdersDashboardScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.storeStatus,
-                    // 💡 MUDANÇA: Altera a cor dinamicamente para maior destaque
                     { color: storeOpen ? colors.success : "#ef4444", fontWeight: 'bold' }
                   ]}
                 >
@@ -551,8 +528,6 @@ const OrdersDashboardScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            {/* 💡 Novo: Botão ou Switch para alternar o status se necessário */}
-            {/* Removido o Switch pois o status deve ser calculado pelos horários */}
           </View>
 
           {/* Stats */}
@@ -894,7 +869,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  // Novos estilos para atualização automática
   updateIndicator: {
     flexDirection: "row",
     justifyContent: "space-between",

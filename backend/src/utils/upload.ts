@@ -15,8 +15,7 @@ const storage = multer.diskStorage({
     } else if (file.fieldname === "productImages") {
       uploadPath = path.join(uploadPath, "products");
     } else if (file.fieldname === "receitaFile") {
-      // 🛑 NOVO: Adicione sua nova rota
-      uploadPath = path.join(uploadPath, "receitas"); // Use a pasta 'receitas'
+      uploadPath = path.join(uploadPath, "receitas"); 
     }
 
     // Cria a pasta se não existir

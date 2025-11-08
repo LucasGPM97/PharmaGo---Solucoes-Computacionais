@@ -12,25 +12,23 @@ export interface CartItem {
   estabelecimente_id?: number;
 }
 
-// Tipagem da Loja
 export interface EstabelecimentoDetails {
   id: number;
   name: string;
 }
 
-// Tipagem COMPLETA para o Resumo do Pedido
 export interface CartDetails {
-  idcarrinho: number; // Precisamos do id do carrinho para o checkout
+  idcarrinho: number; 
   estabelecimento: EstabelecimentoDetails;
   items: CartItem[];
   subtotal: number;
-  deliveryFee: number;
-  total: number;
+  deliveryFee: number; // Agora virá do cálculo do backend/frontend
+  total: number; // O total final que inclui o subtotal + deliveryFee
 }
 
-// Serviço para integrar com a API do backend
 export const CartService = {
-  // Buscar carrinho do cliente
+  // Funções de getCart, addItem, updateQuantity, removeItem, clearCart (não alteradas)
+  
   async getCart(): Promise<CartItem[]> {
     try {
       const token = await getAuthToken();
@@ -43,9 +41,7 @@ export const CartService = {
       const response = await api.get(`/carrinho/${clientId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // 💡 LOG CRÍTICO
       console.log('Dados do carrinho BRUTOS (Backend):', JSON.stringify(response.data, null, 2));
-      // Converter da resposta da API para o formato do frontend
       const carrinhoData = response.data;
       const cartItems: CartItem[] = [];
 
@@ -187,7 +183,7 @@ export const CartService = {
     }
   },
 
-  async getCartDetails(): Promise<CartDetails> {
+async getCartDetails(): Promise<CartDetails> {
     try {
       const token = await getAuthToken();
       const clientId = await getClientId();
@@ -202,19 +198,36 @@ export const CartService = {
 
       const carrinhoData = response.data;
       const cartItems: CartItem[] = [];
-      let subtotalCalculado = 0; // Usaremos este para calcular o total com a taxa de entrega
+      let subtotalCalculado = 0;
+      let estabelecimento: EstabelecimentoDetails = { id: 0, name: "Carrinho Vazio" };
+      let taxaEntrega = 0.0;
+      let valorMinimoEntrega = 0.0;
+      let taxaAplicada = 0.0;
 
-      // 1. Processamento e Cálculo do Subtotal
       if (carrinhoData.carrinho_item && carrinhoData.carrinho_item.length > 0) {
+        
+        const firstItem = carrinhoData.carrinho_item[0];
+        const estabelecimentoData = firstItem?.catalogo_produto?.catalogo?.estabelecimento;
+        
+        if(estabelecimentoData) {
+          taxaEntrega = parseFloat(estabelecimentoData.taxa_entrega || 0.0);
+          valorMinimoEntrega = parseFloat(estabelecimentoData.valor_minimo_entrega || 0.0);
+
+          estabelecimento = {
+            id: estabelecimentoData.idestabelecimento || 0, 
+            name: estabelecimentoData.razao_social || "Estabelecimento Desconhecido", 
+          };
+        }
+
         carrinhoData.carrinho_item.forEach((item: any) => {
           if (item.catalogo_produto && item.catalogo_produto.produto) {
             const price = parseFloat(item.catalogo_produto.valor_venda);
             const quantity = item.quantidade;
 
+            // 1. CALCULA O SUBTOTAL (Soma de todos os itens)
             subtotalCalculado += price * quantity;
 
             cartItems.push({
-              // 🚨 CORREÇÃO: Usar o caminho correto para o ID do produto no catálogo
               id: item.catalogo_produto.idcatalogo_produto.toString(),
               name: item.catalogo_produto.produto.nome_comercial,
               price: price,
@@ -223,8 +236,27 @@ export const CartService = {
             });
           }
         });
+
+        // Arredonda o subtotal para 2 casas decimais (importante para evitar problemas de float)
+        const subtotalAtualizado = Math.round(subtotalCalculado * 100) / 100;
+        
+        // 2. LÓGICA DA TAXA DE ENTREGA: Frete Grátis se atingir o mínimo
+        taxaAplicada = subtotalAtualizado >= valorMinimoEntrega ? 0.0 : taxaEntrega;
+        
+        // 3. CALCULA O TOTAL FINAL (Subtotal + Taxa)
+        const totalFinal = subtotalAtualizado + taxaAplicada;
+
+        return {
+          idcarrinho: carrinhoData.idcarrinho,
+          estabelecimento: estabelecimento,
+          items: cartItems,
+          subtotal: subtotalAtualizado,
+          deliveryFee: taxaAplicada,
+          total: totalFinal,
+        };
+
       } else {
-        // Retorna dados de carrinho vazio para evitar erros
+        // Carrinho vazio
         return {
           idcarrinho: carrinhoData.idcarrinho || 0,
           estabelecimento: { id: 0, name: "Carrinho Vazio" },
@@ -234,36 +266,8 @@ export const CartService = {
           total: 0,
         };
       }
-
-      // 2. Determinação do Subtotal e Loja (se não vierem na raiz do carrinho)
-      // Se o backend enviar um total, usamos ele como subtotal:
-      const subtotal = parseFloat(
-        carrinhoData.total || subtotalCalculado.toFixed(2)
-      );
-
-      // Hardcoded: Você deve obter a taxa de entrega da API, não fixar no front
-      const deliveryFee = 7.9;
-      const totalFinal = subtotal + deliveryFee;
-
-      // 🚨 SOLUÇÃO PARA O CAMPO ESTABELECIMENTO: Pega o ID do catálogo do primeiro item como referência
-      const firstItem = carrinhoData.carrinho_item[0];
-      const estabelecimento: EstabelecimentoDetails = {
-        id: firstItem?.catalogo_produto?.catalogo_idcatalogo || 1, // ID do Catálogo (geralmente 1:1 com a loja)
-        name: "Loja Padrão Central", // Use um nome fixo ou busque de outra forma
-      };
-      // ----------------------------------------------------
-
-      return {
-        idcarrinho: carrinhoData.idcarrinho,
-        estabelecimento: estabelecimento,
-        items: cartItems,
-        subtotal: subtotal,
-        deliveryFee: deliveryFee,
-        total: totalFinal,
-      };
     } catch (error) {
       console.error("Erro ao buscar detalhes do carrinho para resumo:", error);
-      // Re-throw para ser pego pelo bloco try/catch da tela
       throw error;
     }
   },

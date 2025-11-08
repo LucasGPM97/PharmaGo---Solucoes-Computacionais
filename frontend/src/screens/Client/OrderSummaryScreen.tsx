@@ -8,7 +8,7 @@ import {
   StatusBar,
   Dimensions,
   Alert,
-  ActivityIndicator, // 🚨 Adicionado para o Loading
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -17,8 +17,7 @@ import {
   CartDetails,
   CartService,
   CartItem,
-} from "../../services/client/CartService"; // Incluída CartItemDetails
-// 🚨 Importação do PedidoService (Ajuste conforme o nome do seu arquivo)
+} from "../../services/client/CartService";
 import { PedidoService } from "../../services/client/PedidoService";
 import Header from "../../components/common/Header";
 
@@ -28,21 +27,19 @@ type OrderSummaryProps = {
   navigation: any;
 };
 
-// Tipo para os parâmetros recebidos via navegação
 type RouteParams = {
-  selectedAddress: any; // O endereço completo selecionado
+  selectedAddress: any;
   selectedPaymentMethod: "local" | "card" | "wallet" | "pix";
 };
 
-// 🚨 MANTIDA A FUNÇÃO DE CONVERSÃO FORA DO COMPONENTE
 const getPaymentMethodId = (method: string): number => {
   switch (method) {
     case "card":
-      return 1; // ID do Cartão na sua tabela FormaPagamento
+      return 1;
     case "pix":
-      return 2; // ID do Pix na sua tabela FormaPagamento
+      return 2;
     case "local":
-      return 3; // ID do Pagamento na entrega na sua tabela FormaPagamento
+      return 3;
     default:
       return 1;
   }
@@ -57,36 +54,29 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ navigation }) => {
   const { selectedAddress, selectedPaymentMethod } =
     route.params as RouteParams;
 
-  // FUNÇÃO DE CARREGAMENTO DE DADOS DA API
   useEffect(() => {
     const loadCartDetails = async () => {
       if (!selectedAddress || !selectedPaymentMethod) {
-        Alert.alert(
-          "Erro",
-          "Faltando dados de endereço ou pagamento. Retornando ao carrinho."
-        );
+        Alert.alert("Erro", "Faltando dados de endereço ou pagamento.");
         navigation.goBack();
         return;
       }
 
       try {
         setIsLoading(true);
-        const details = await CartService.getCartDetails();
 
-        if (!details || details.items.length === 0) {
-          Alert.alert(
-            "Carrinho Vazio",
-            "O carrinho está vazio ou os dados são inválidos."
+        if (route.params?.cartDetails) {
+          setCartDetails(route.params.cartDetails);
+          console.log(
+            "✅ Usando cartDetails da tela anterior:",
+            route.params.cartDetails
           );
-          navigation.goBack();
-          return;
+        } else {
+          const details = await CartService.getCartDetails();
+          setCartDetails(details);
         }
-        setCartDetails(details);
       } catch (error) {
-        console.error(
-          "Erro ao carregar detalhes do carrinho para resumo:",
-          error
-        );
+        console.error("Erro ao carregar detalhes do carrinho:", error);
         Alert.alert(
           "Erro",
           "Não foi possível carregar os detalhes finais do pedido."
@@ -99,18 +89,15 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ navigation }) => {
     loadCartDetails();
   }, []);
 
-  // Formatar preço
   const formatPrice = (price: number) => {
     return `R$ ${price.toFixed(2).replace(".", ",")}`;
   };
 
-  // 🚨 FUNÇÃO CONFIRMORDER CORRIGIDA E SEM REPETIÇÃO
   const confirmOrder = async () => {
     if (!cartDetails || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      // ⚠️ O ID do endereço deve ser o ID que o seu backend espera (selectedAddress.id)
       const addressId = selectedAddress.addressData?.idendereco_cliente;
       const paymentId = getPaymentMethodId(selectedPaymentMethod);
 
@@ -118,14 +105,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ navigation }) => {
         throw new Error("ID do endereço ou pagamento inválido.");
       }
 
-      // Chama o serviço de criação de pedido com os DADOS CORRIGIDOS (tipagem do backend)
       const pedidoCriado = await PedidoService.createOrderFromCart({
         idcarrinho: cartDetails.idcarrinho,
-        // Nomes que o Sequelize espera:
         endereco_cliente_idendereco_cliente: addressId,
         forma_pagamento_idforma_pagamento: paymentId,
 
-        // Campos auxiliares
         forma_pagamento_string: selectedPaymentMethod,
         observacoes: "",
       });
@@ -146,25 +130,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ navigation }) => {
     }
   };
 
-  // Voltar
-  const goBack = () => {
-    navigation.goBack();
-  };
-
-  const renderHeader = () => (
-    // ... (Sem mudanças)
-    <View style={styles.header}>
-      <TouchableOpacity onPress={goBack} style={styles.backButton}>
-        <MaterialIcons name="arrow-back-ios" size={24} color="#007AFF" />
-      </TouchableOpacity>
-
-      <Text style={styles.headerTitle}>Resumo do Pedido</Text>
-
-      <View style={styles.headerSpacer} />
-    </View>
-  );
-
-  // Função de renderização para itens
   const renderProductItem = (product: CartItem) => (
     <View key={product.id} style={styles.productItem}>
       <View style={styles.productImage}>
@@ -300,7 +265,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ navigation }) => {
     </View>
   );
 
-  // Renderização de Loading
   if (isLoading || !cartDetails) {
     return (
       <SafeAreaView style={styles.container}>
@@ -337,7 +301,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // ... (Seus estilos originais)
   container: {
     flex: 1,
     backgroundColor: "#F8F8F8",

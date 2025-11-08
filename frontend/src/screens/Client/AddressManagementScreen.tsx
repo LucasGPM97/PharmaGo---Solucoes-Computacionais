@@ -17,6 +17,7 @@ import {
   getEnderecosByCliente,
   deleteEnderecoCliente,
   AddressData,
+  MANAGE_LOCATION_NAME
 } from "../../services/client/ClientAddressService";
 import AddressModalCliente from "../../components/client/AddressModalClient";
 import Header from "../../components/common/Header";
@@ -37,6 +38,37 @@ type AddressManagementProps = {
   navigation: any;
 };
 
+const stateToUFMap: { [key: string]: string } = {
+  Acre: "AC",
+  Alagoas: "AL",
+  Amapá: "AP",
+  Amazonas: "AM",
+  Bahia: "BA",
+  Ceará: "CE",
+  "Distrito Federal": "DF",
+  "Espírito Santo": "ES",
+  Goiás: "GO", // <-- Mapeamento principal
+  Maranhão: "MA",
+  "Mato Grosso": "MT",
+  "Mato Grosso do Sul": "MS",
+  "Minas Gerais": "MG",
+  Pará: "PA",
+  Paraíba: "PB",
+  Paraná: "PR",
+  Pernambuco: "PE",
+  Piauí: "PI",
+  "Rio de Janeiro": "RJ",
+  "Rio Grande do Norte": "RN",
+  "Rio Grande do Sul": "RS",
+  Rondônia: "RO",
+  Roraima: "RR",
+  "Santa Catarina": "SC",
+  "São Paulo": "SP",
+  Sergipe: "SE",
+  Tocantins: "TO",
+};
+
+
 const AddressManagement: React.FC<AddressManagementProps> = ({
   navigation,
 }) => {
@@ -48,6 +80,19 @@ const AddressManagement: React.FC<AddressManagementProps> = ({
   const [editingAddress, setEditingAddress] = useState<Address | undefined>(
     undefined
   );
+
+  const getUFFromStateName = (stateName: string | null | undefined): string => {
+  if (!stateName) return "XX"; // Fallback para "Desconhecido"
+
+  // Normaliza (remove acentos, caixa baixa) para garantir a correspondência
+  const normalizedName = stateName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+  // Procura no mapa, se não encontrar, usa 'XX'
+  return stateToUFMap[stateName.trim()] || "XX";
+};
 
   // Carregar endereços do cliente
   const loadAddresses = async () => {
@@ -245,8 +290,6 @@ const AddressManagement: React.FC<AddressManagementProps> = ({
   };
 
   const renderAddressCard = (address: Address) => (
-    // Use TouchableOpacity para tornar todo o card clicável
-    // Adicione um estilo para feedback visual ao tocar (opcional)
     <TouchableOpacity
       key={address.id}
       style={[
@@ -276,7 +319,7 @@ const AddressManagement: React.FC<AddressManagementProps> = ({
                 : styles.regularAddressTitle,
             ]}
           >
-            {address.title}
+           {address.isCurrentLocation ? "Localização Atual" : address.addressData?.nome_endereco}
           </Text>
           <Text
             style={[
@@ -298,13 +341,12 @@ const AddressManagement: React.FC<AddressManagementProps> = ({
             <ActivityIndicator size="small" color="#007AFF" />
           )}
 
-          {/* Mantendo o botão de "Excluir" separado */}
           {!address.isCurrentLocation && (
             <TouchableOpacity
               style={styles.deleteButton}
               onPress={(e) => {
-                e.stopPropagation(); // Previne que o toque suba e acione o onPress do card
-                removeAddress(address); // Ação de exclusão separada
+                e.stopPropagation(); 
+                removeAddress(address); 
               }}
             >
               <MaterialIcons name="delete-outline" size={24} color="#EF4444" />

@@ -49,11 +49,8 @@ CatalogoProduto.init(
     updatedAt: "updated_at",
     indexes: [
       {
-        // O nome do índice, correspondendo a 'unique_catalogo_produto'
         name: "unique_catalogo_produto",
-        // Define o índice como UNIQUE
         unique: true,
-        // As colunas que compõem a chave única
         fields: ["produto_idproduto", "catalogo_idcatalogo"],
       },
     ],

@@ -281,11 +281,11 @@ export const storeService = {
         console.log("   Message:", error.message);
       }
 
-      console.log("🔧 Configuração completa do erro:", error.config); // Lança o erro para ser capturado pela função chamadora
+      console.log("🔧 Configuração completa do erro:", error.config);
 
       throw error;
     }
-  }, // Alternar favorito do produto no catálogo
+  },
 
   async toggleProductFavorite(
     idcatalogo_produto: string,
@@ -302,7 +302,7 @@ export const storeService = {
       );
       throw error;
     }
-  }, // Adicionar produto ao carrinho
+  }, 
 
   async addToCart(
     idcliente: number,
@@ -332,7 +332,7 @@ export const storeService = {
   ): Promise<void> {
     try {
       const token = await getAuthToken();
-      const estabelecimentoid = await getEstablishmentId(); // ATENÇÃO: Você precisará confirmar com seu backend qual é a rota exata. // Aqui estou usando uma rota PATCH no estabelecimento, enviando o array de updates. // Outra abordagem comum é ter um endpoint /horario_funcionamento/bulk
+      const estabelecimentoid = await getEstablishmentId(); 
       const response = await api.patch(
         `/horarios/estabelecimentos/${estabelecimentoid}/horarios`,
         scheduleUpdates,
@@ -351,7 +351,7 @@ export const storeService = {
       console.error(
         `Erro ao atualizar horários do estabelecimento ${establishmentId}:`,
         error
-      ); // Re-lança o erro para ser tratado no Modal
+      );
       throw error;
     }
   },

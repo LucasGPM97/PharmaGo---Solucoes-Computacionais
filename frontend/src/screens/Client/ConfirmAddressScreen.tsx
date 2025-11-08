@@ -13,8 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-
-// 1. IMPORTAÇÕES CHAVE
 import {
   getEnderecosByCliente,
   AddressData,
@@ -28,7 +26,7 @@ import Header from "../../components/common/Header";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// 2. DEFINIÇÕES DE TIPOS
+
 type Address = {
   id: string;
   title: string;
@@ -171,7 +169,6 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
         const ufCode = getUFFromStateName(stateName); // <-- Aqui! 'Goiás' -> 'GO'
 
         // 2. Definindo a cidade/bairro (Subregion/District)
-        // O Expo no Brasil frequentemente coloca a cidade em 'subregion' e o bairro em 'district'.
         const cityValue =
           address.subregion || address.city || "Cidade Desconhecida";
         const neighborhoodValue = address.district || "";
@@ -181,11 +178,10 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
           cep: address.postalCode || "00000000",
           street: address.street || "Localização atual",
           number: address.streetNumber || "S/N",
-          neighborhood: neighborhoodValue, // 'Residencial Buritis'
-          city: cityValue, // 'Senador Canedo' (Melhor que 'null')
-          state: stateName, // 'Goiás' (Nome completo, se o DB tiver campo 'estado')
-          // >>> AJUSTE CRÍTICO: Usa a sigla de 2 letras
-          uf: ufCode, // 'GO'
+          neighborhood: neighborhoodValue, 
+          city: cityValue,
+          state: stateName, 
+          uf: ufCode, 
           complement: "",
           addressName: MANAGE_LOCATION_NAME,
           latitude: String(latitude),
@@ -194,13 +190,13 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
 
         // Cria a estrutura de exibição na UI
         const formattedAddress: Address = {
-          id: "current_location_temp", // ID temporário
+          id: "current_location_temp", 
           title: MANAGE_LOCATION_NAME,
           address: `${locationAddressData.street}, ${locationAddressData.number}`,
           fullAddress: `${locationAddressData.neighborhood}, ${locationAddressData.city} - ${locationAddressData.state}`,
           details: locationAddressData.complement || "",
           isCurrentLocation: true,
-          isSelected: false, // Não seleciona automaticamente ao carregar/atualizar
+          isSelected: false, 
           addressData: locationAddressData,
         };
 
@@ -227,7 +223,6 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
     getCurrentLocation();
   }, []);
 
-  // Funções de UI (selectAddress, addNewAddress, handleSaveAddress, goBack, refreshLocation, editAddress)
   const selectAddress = (id: string) => {
     setAddresses((prev) =>
       prev.map((address) => ({
@@ -276,12 +271,10 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
 
   const editAddress = (address: Address) => {
     if (address.addressData) {
-      // Lógica para abrir modal de edição (você pode implementar aqui)
       selectAddress(address.id);
     }
   };
 
-  // 4. FUNÇÃO proceedToNext (Lógica de Persistência Condicional)
   const proceedToNext = async () => {
     const selectedAddress = addresses.find((addr) => addr.isSelected);
 
@@ -292,7 +285,6 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
 
     let finalAddressToSend = selectedAddress.addressData;
 
-    // Se o endereço for a "Localização Atual"
     if (selectedAddress.isCurrentLocation) {
       if (!selectedAddress.addressData) {
         Alert.alert(
@@ -303,18 +295,14 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
       }
 
       try {
-        // Garante que o usuário veja que a localização está sendo processada
         Alert.alert("Processando", "Salvando sua localização atual...");
 
-        // Chama a função do service para CRIAR/ATUALIZAR no DB
         const managedAddress = await manageCurrentLocationAddress(
           selectedAddress.addressData
         );
 
-        // Recebe o AddressData com o ID numérico preenchido
         finalAddressToSend = managedAddress;
 
-        // Atualiza a UI para refletir o endereço agora salvo no DB (Opcional, mas útil)
         setAddresses((prev) =>
           prev.map((addr) =>
             addr.id === selectedAddress.id
@@ -338,17 +326,15 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ navigation }) => {
 
     console.log("Endereço selecionado para envio:", finalAddressToSend);
 
-    // Navega para o resumo do pedido com o AddressData final (contendo o ID numérico)
     navigation.navigate("ConfirmPayment", {
       selectedAddress: {
         ...selectedAddress,
-        addressData: finalAddressToSend, // Garante que o ID numérico será enviado
+        addressData: finalAddressToSend,
       },
       cartTotal: cartTotal,
     });
   };
 
-  // Componentes de Renderização (Header, Card, Button, Footer)
 
   const renderAddressCard = (address: Address) => (
     <TouchableOpacity

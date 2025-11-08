@@ -1,25 +1,23 @@
-// Types for Client-side (Cliente)
 
 import { Estabelecimento } from "../establishment";
 
 export interface Cliente {
-  idcliente: number; // Alterado para idcliente e number
+  idcliente: number; 
   nome: string;
   email: string;
   imagem_perfil_url?: string;
   documento_identificacao: string;
-  data_nascimento: string; // Mantido como string (ISO date format) para facilitar o uso no frontend
+  data_nascimento: string; 
   numero_contato: string;
-  // Senha não deve ser incluída no type de resposta
 }
 
 export interface Produto {
-  idproduto: string; // Alterado para idproduto
+  idproduto: string; 
   idcatalogo_produto: number;
   apresentacao: string;
   descricao: string;
   classe_terapeutica: string;
-  preco: number; // Preço base do produto
+  preco: number; 
   imagens?: ProdutoImagem[];
   disponibilidade: boolean;
   detentor_registro: string;
@@ -30,13 +28,13 @@ export interface Produto {
 }
 
 export interface ProdutoImagem {
-  idproduto_imagem: number; // Alterado para idproduto_imagem
+  idproduto_imagem: number;
   url: string;
-  produtoId: number; // Alterado para number
+  produtoId: number;
 }
 
 export interface CatalogoProduto {
-  idcatalogo_produto: number; // Alterado para idcatalogo_produto
+  idcatalogo_produto: number;
   idproduto: number;
   estabelecimentoId: number;
   preco: number;
@@ -45,7 +43,7 @@ export interface CatalogoProduto {
 }
 
 export interface PedidoItem {
-  idpedido_item: number; // Alterado para idpedido_item
+  idpedido_item: number;
   catalogoProdutoId: number;
   quantidade: number;
   precoUnitario: number;
@@ -53,7 +51,7 @@ export interface PedidoItem {
 }
 
 export interface Pedido {
-  idpedido: number; // Alterado para idpedido
+  idpedido: number;
   clienteId: number;
   estabelecimentoId: number;
   status: string;
@@ -62,14 +60,14 @@ export interface Pedido {
 }
 
 export interface CarrinhoItem {
-  id: number; // Manter como string ou ajustar se o backend tiver um ID
+  id: number;
   catalogoProdutoId: number;
   quantidade: number;
   catalogoProduto: CatalogoProduto;
 }
 
 export interface Carrinho {
-  id: number; // Manter como string ou ajustar se o backend tiver um ID
+  id: number; 
   clienteId: number;
   itens: CarrinhoItem[];
 }

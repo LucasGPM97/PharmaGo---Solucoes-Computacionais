@@ -12,8 +12,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { ClientStackParamList } from "../../navigation/ClientNavigator";
 import Header from "../../components/common/Header";
 import { getOrdersByUserId, Order } from "../../services/client/PedidoService";
-// 1. IMPORTAR HOOK/CONTEXTO DE AUTENTICAÇÃO
-import { getUserId } from "../../services/common/AuthService"; // 🚨 Substitua pelo caminho real do seu contexto
+import { getUserId } from "../../services/common/AuthService";
 
 type MyOrdersScreenNavigationProp = StackNavigationProp<
   ClientStackParamList,
@@ -29,9 +28,8 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. ACESSAR O ID DO USUÁRIO LOGADO VIA CONTEXTO
 
-  const userId = getUserId(); // Assumindo que o objeto 'user' no contexto tem a propriedade 'id'
+  const userId = getUserId();
 
   useEffect(() => {
     const fetchOrders = async (id: string) => {
@@ -39,7 +37,6 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
         const fetchedOrders = await getOrdersByUserId(id);
         setOrders(fetchedOrders);
       } catch (err) {
-        // Em produção, você pode querer logar o erro completo no console: console.error(err);
         setError(
           "Não foi possível carregar seus pedidos. Tente novamente mais tarde."
         );
@@ -48,18 +45,14 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
       }
     };
 
-    // 3. GARANTIR QUE O ID EXISTE ANTES DE FAZER A CHAMADA
     if (userId) {
-      // Se o ID for string (como '1'), o useEffect rodará quando mudar.
       fetchOrders(userId);
     } else {
-      // Se o usuário não estiver logado, não há pedidos para buscar.
       setLoading(false);
       setError("Usuário não autenticado.");
       Alert.alert("Erro de Autenticação", "Por favor, faça login novamente.");
-      // Opcional: navigation.navigate('Login');
     }
-  }, [userId]); // Dependência no userId para recarregar se o login/usuário mudar
+  }, [userId]);
 
   const renderOrderItem = ({ item }: { item: Order }) => (
     <TouchableOpacity
@@ -106,7 +99,7 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
       ) : (
         <FlatList
           data={orders}
-          keyExtractor={(item) => String(item.id)} // Garantir que a key é string
+          keyExtractor={(item) => String(item.id)}
           renderItem={renderOrderItem}
           contentContainerStyle={styles.listContent}
         />
@@ -116,7 +109,6 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // ... (Estilos permanecem os mesmos)
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",

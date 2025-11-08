@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS forma_pagamento (
     nome VARCHAR(100) NOT NULL,
     ativo BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 INSERT INTO forma_pagamento (idforma_pagamento, nome, ativo) VALUES
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS pedido (
     FOREIGN KEY (cliente_idcliente) REFERENCES cliente(idcliente)  ,
     FOREIGN KEY (estabelecimento_idestabelecimento) REFERENCES estabelecimento(idestabelecimento)  ,
     FOREIGN KEY (endereco_cliente_idendereco_cliente) REFERENCES endereco_cliente(idendereco_cliente)  ,
-    FOREIGN KEY (forma_pagamento_idforma_pagamento) REFERENCES forma_pagamento(idforma_pagamento)  ,
+    FOREIGN KEY (forma_pagamento_idforma_pagamento) REFERENCES forma_pagamento(idforma_pagamento)
 );
 
 CREATE TABLE IF NOT EXISTS pedido_item (

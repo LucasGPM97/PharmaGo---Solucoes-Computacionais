@@ -8,13 +8,11 @@ export const ReceitaService = {
     fileAsset: DocumentPicker.DocumentPickerAsset,
     pedidoId: string
   ): Promise<any> {
-    // Verifica autenticação primeiro
     const authenticated = await isAuthenticated();
     if (!authenticated) {
       throw new Error("Usuário não autenticado. Faça login novamente.");
     }
 
-    // Valida o tipo de arquivo
     const allowedTypes = [
       "image/jpeg",
       "image/jpg",
@@ -27,7 +25,6 @@ export const ReceitaService = {
 
     const formData = new FormData();
 
-    // Corrige a criação do FormData
     formData.append("receitaFile", {
       uri: fileAsset.uri,
       name: fileAsset.name || `receita-${Date.now()}.jpg`,
@@ -43,7 +40,6 @@ export const ReceitaService = {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          // Não defina Content-Type manualmente para FormData
         },
         body: formData,
       });
@@ -74,7 +70,6 @@ export const ReceitaService = {
     }
   },
 
-  // Método auxiliar para selecionar arquivo
   async pickReceita(): Promise<DocumentPicker.DocumentPickerResult> {
     try {
       const result = await DocumentPicker.getDocumentAsync({

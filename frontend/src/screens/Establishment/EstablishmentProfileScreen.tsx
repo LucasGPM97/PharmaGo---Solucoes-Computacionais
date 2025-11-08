@@ -54,7 +54,7 @@ const EstablishmentProfileScreen: React.FC<EstablishmentStackParamList> = ({
       if (addresses.length > 0) {
         setSavedAddress(addresses[0]);
       } else {
-        setSavedAddress(null); // Garante que fique null se não houver endereços
+        setSavedAddress(null);
       }
     } catch (error) {
       console.error("Erro ao carregar endereço:", error);
@@ -64,7 +64,6 @@ const EstablishmentProfileScreen: React.FC<EstablishmentStackParamList> = ({
     }
   };
 
-  // Carrega endereços quando o componente monta
   useEffect(() => {
     fetchAddress();
   }, []);
@@ -99,7 +98,6 @@ const EstablishmentProfileScreen: React.FC<EstablishmentStackParamList> = ({
     console.log("Raio de Entrega Salvo:", radius, "km");
   };
 
-  // CORREÇÃO: Funções para o modal de endereço
   const handleOpenAddressModal = () => {
     if (isLoadingAddress) return;
     setIsAddressModalVisible(true);
@@ -109,11 +107,9 @@ const EstablishmentProfileScreen: React.FC<EstablishmentStackParamList> = ({
     setIsAddressModalVisible(false);
   };
 
-  //  Função para salvar endereço - atualiza o estado e recarrega
   const handleSaveAddress = async (address: AddressData) => {
     console.log("Endereço Salvo:", address);
     setSavedAddress(address);
-    // Recarrega os endereços para garantir que está sincronizado
     await fetchAddress();
   };
 
@@ -126,7 +122,6 @@ const EstablishmentProfileScreen: React.FC<EstablishmentStackParamList> = ({
     });
   };
 
-  // Lógica para mostrar um subtítulo resumindo o horário atual
   const getSubtitle = () => {
     if (!businessSchedule) return "Não configurado";
 
@@ -136,12 +131,10 @@ const EstablishmentProfileScreen: React.FC<EstablishmentStackParamList> = ({
     return `${openDays.length} dias abertos`;
   };
 
-  // Lógica para mostrar o subtítulo do raio de entrega
   const getRadiusSubtitle = () => {
     return `${deliveryRadius} km`;
   };
 
-  // Lógica para mostrar o subtítulo do endereço
   const getAddressSubtitle = () => {
     if (isLoadingAddress) return "Carregando...";
     if (!savedAddress) return "Não configurado";

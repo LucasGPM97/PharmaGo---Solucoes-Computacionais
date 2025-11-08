@@ -80,7 +80,6 @@ export const updateCliente = async (
   }
 };
 
-// Função auxiliar para obter o ID do cliente
 export const getCurrentClienteId = async (): Promise<number | null> => {
   try {
     const clientid = await getClientId();

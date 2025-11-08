@@ -8,16 +8,12 @@ import PaymentScreen from "../screens/Client/PaymentScreen";
 import MyOrdersScreen from "../screens/Client/MyOrdersScreen";
 import ProfileScreen from "../screens/Client/ProfileScreen";
 import SearchScreen from "../screens/Client/SearchScreen";
-import AttachPrescriptionScreen from "../screens/Client/AttachPrescriptionScreen";
 import ConfirmAddressScreen from "../screens/Client/ConfirmAddressScreen";
-import CardOptionsScreen from "../screens/Client/CardOptionsScreen";
 import OrderSummaryScreen from "../screens/Client/OrderSummaryScreen";
-import OrderSuccessScreen from "../screens/Client/OrderSuccessScreen";
 import OrderDetailsScreen from "../screens/Client/OrderDetailsScreen";
 import OrderFeedScreen from "../screens/Client/OrderFeedScreen";
 import AccountDetailsScreen from "../screens/Client/AccountDetailsScreen";
 import PaymentManagementScreen from "../screens/Client/PaymentManagementScreen";
-import ConfirmPaymentDeletionScreen from "../screens/Client/ConfirmPaymentDeletionScreen";
 import AddressManagementScreen from "../screens/Client/AddressManagementScreen";
 import ConfirmPaymentScreen from "../screens/Client/ConfirmPaymentScreen";
 import { CartItem } from "../services/client/CartService";
@@ -32,22 +28,18 @@ export type ClientStackParamList = {
   MyOrders: undefined;
   Profile: undefined;
   Search: undefined;
-  AttachPrescription: undefined;
   ConfirmAddress: {
     cartItems: CartItem[];
     total: number;
     receitaAnexada?: boolean;
   };
-  CardOptions: undefined;
+  
   OrderSummary: undefined;
-  OrderSuccess: undefined;
   OrderDetails: { orderId: string };
   OrderFeed: undefined;
   AccountDetails: undefined;
   PaymentManagement: undefined;
-  ConfirmPaymentDeletion: undefined;
   AddressManagement: undefined;
-  ConfirmAddressDeletion: undefined;
   ConfirmPaymentScreen: undefined;
   UploadReceitaModal: {
     cartItems: CartItem[];
@@ -90,9 +82,7 @@ const ClientNavigator = () => {
         name="ConfirmPayment"
         component={ConfirmPaymentScreen}
       />
-      <ClientStack.Screen name="CardOptions" component={CardOptionsScreen} />
       <ClientStack.Screen name="OrderSummary" component={OrderSummaryScreen} />
-      <ClientStack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
       <ClientStack.Screen name="OrderDetails" component={OrderDetailsScreen} />
       <ClientStack.Screen name="OrderFeed" component={OrderFeedScreen} />
       <ClientStack.Screen
@@ -102,10 +92,6 @@ const ClientNavigator = () => {
       <ClientStack.Screen
         name="PaymentManagement"
         component={PaymentManagementScreen}
-      />
-      <ClientStack.Screen
-        name="ConfirmPaymentDeletion"
-        component={ConfirmPaymentDeletionScreen}
       />
       <ClientStack.Screen
         name="AddressManagement"

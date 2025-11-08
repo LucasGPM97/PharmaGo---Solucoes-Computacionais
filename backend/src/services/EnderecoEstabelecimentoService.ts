@@ -1,7 +1,7 @@
 import EnderecoEstabelecimento from "../models/EnderecoEstabelecimento";
 
 class EnderecoEstabelecimentoService {
-  // Nome da classe ajustado
+
   public async createEndereco(data: any): Promise<EnderecoEstabelecimento> {
     const {
       estabelecimento_idestabelecimento,
@@ -39,7 +39,6 @@ class EnderecoEstabelecimentoService {
     return endereco;
   }
 
-  // Renomeado para buscar por Estabelecimento
   public async getAllEnderecosByEstabelecimento(
     estabelecimento_idestabelecimento: number
   ): Promise<EnderecoEstabelecimento[]> {
@@ -58,10 +57,8 @@ class EnderecoEstabelecimentoService {
       {
         where: { idendereco_estabelecimento },
         returning: true,
-        // O `affectedRows` retornado pelo Sequelize é um array contendo os objetos atualizados (depende do dialect)
       }
     );
-    // Retorna apenas a contagem de afetados, conforme o esperado pelo Controller
     return [affectedCount, affectedRows as EnderecoEstabelecimento[]];
   }
 
@@ -75,4 +72,4 @@ class EnderecoEstabelecimentoService {
   }
 }
 
-export default new EnderecoEstabelecimentoService(); // Exportação ajustada
+export default new EnderecoEstabelecimentoService(); 

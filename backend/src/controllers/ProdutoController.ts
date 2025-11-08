@@ -15,10 +15,9 @@ class ProdutoController {
 
   public async findById(req: Request, res: Response): Promise<Response> {
     try {
-      const idproduto = req.params.idproduto; // Converte o ID para número
-      console.log("ID recebido:", Number(idproduto)); // Log para verificar o ID que está sendo passado
+      const idproduto = req.params.idproduto;
+      console.log("ID recebido:", Number(idproduto));
 
-      // Verifica se o ID é um número válido
       if (isNaN(Number(idproduto))) {
         return res.status(400).json({ message: "ID inválido" });
       }
@@ -97,13 +96,9 @@ class ProdutoController {
     }
   }
 
-  // /controllers/ProdutoController.ts (ADICIONAR este novo método)
-
-  // ... imports e outros métodos
 
   public async findByClasse(req: Request, res: Response): Promise<Response> {
     try {
-      // A classe será passada como query parameter: /api/produtos?classe=Cardiologia
       const { classe } = req.query;
 
       if (typeof classe !== "string" || !classe) {
@@ -135,7 +130,6 @@ class ProdutoController {
         });
     }
   }
-  // ... outros métodos
 }
 
 export default new ProdutoController();

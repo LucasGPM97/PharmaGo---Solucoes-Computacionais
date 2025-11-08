@@ -140,13 +140,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ navigation, route }) => {
     }
   };
 
-  // Função para formatar o telefone para exibição
   const formatPhoneNumber = (phone: string) => {
     if (!phone) return "Não disponível";
 
     const cleanPhone = phone.replace(/\D/g, "");
 
-    // Formatação para números brasileiros
     if (cleanPhone.length === 11) {
       return `(${cleanPhone.slice(0, 2)}) ${cleanPhone.slice(
         2,
@@ -285,14 +283,13 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ navigation, route }) => {
         const valorUnitario = parseFloat(item.valor_unitario_venda) || 0;
         const precoTotal = valorUnitario * (item.quantidade || 0);
 
-        // Crie o objeto product com os dados necessários
         const product = {
           id: item.catalogo_produto?.produto?.idproduto,
           nome_comercial: item.catalogo_produto?.produto?.nome_comercial,
           apresentacao: item.catalogo_produto?.produto?.apresentacao,
           substancia_ativa: item.catalogo_produto?.produto?.substancia_ativa,
           tarja: item.catalogo_produto?.produto?.tarja,
-          disponibilidade: item.catalogo_produto?.disponibilidade, // ou true, dependendo da sua lógica
+          disponibilidade: item.catalogo_produto?.disponibilidade,
         };
 
         return (
@@ -412,16 +409,14 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ navigation, route }) => {
   );
 
   const renderTracking = () => {
-    // Mapeamento de status do backend para porcentagem/visual
     const currentStatus = order.status;
     let progressWidth = "0%";
     let separacaoActive = false;
     let rotaActive = false;
     let entregueCompleted = false;
     let cancelado = false;
-    let progressColor = "#2563EB"; // Azul padrão
+    let progressColor = "#2563EB";
 
-    // Adapte esses nomes de status ao que seu backend realmente envia
     if (currentStatus === "Aguardando Pagamento") {
       progressWidth = "0%";
     } else if (currentStatus === "Em Separação") {
@@ -436,11 +431,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ navigation, route }) => {
       separacaoActive = true;
       rotaActive = true;
       entregueCompleted = true;
-      progressColor = "#10B981"; // VERDE para entregue
+      progressColor = "#10B981";
     } else if (currentStatus === "Cancelado") {
       progressWidth = "0%";
       cancelado = true;
-      progressColor = "#EF4444"; // VERMELHO para cancelado
+      progressColor = "#EF4444";
     }
 
     return (
@@ -1046,7 +1041,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontStyle: "italic",
   },
-  // Estilos para pedido entregue
   deliveredContainer: {
     backgroundColor: "#F0FDF4",
     borderColor: "#BBF7D0",
@@ -1072,8 +1066,6 @@ const styles = StyleSheet.create({
     color: "#166534",
     fontWeight: "500",
   },
-
-  // Estilos para pedido cancelado (mantenha os existentes)
   cancelledContainer: {
     backgroundColor: "#FEF2F2",
     borderColor: "#FECACA",
@@ -1099,8 +1091,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-
-  // Status atual
   currentStatus: {
     marginTop: 16,
     paddingTop: 12,
@@ -1123,10 +1113,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: 12, // Adicione gap para espaçamento
+    gap: 12, 
   },
   productImageContainer: {
-    width: 80, // Largura fixa para a imagem
+    width: 80,
     alignItems: "center",
   },
   productImageStyle: {

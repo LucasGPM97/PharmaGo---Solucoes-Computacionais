@@ -1,8 +1,4 @@
-// maskUtils.ts
 
-/**
- * Define os tipos de máscara disponíveis.
- */
 export type MaskType =
   | "cpf"
   | "phone"

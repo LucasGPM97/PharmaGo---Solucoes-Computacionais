@@ -41,12 +41,12 @@ class AuthService {
     const cliente = await Cliente.findOne({ where: { email } });
 
     if (!cliente) {
-      return null; // Cliente não encontrado
+      return null; 
     }
 
     const isPasswordValid = await bcrypt.compare(senha, cliente.senha);
     if (!isPasswordValid) {
-      return null; // Senha inválida
+      return null; 
     }
 
     const token = jwt.sign(
@@ -55,7 +55,6 @@ class AuthService {
       { expiresIn: "1h" }
     );
 
-    // Retornar dados do cliente (sem a senha)
     const clienteData = {
       idcliente: cliente.idcliente,
       email: cliente.email,
@@ -75,21 +74,16 @@ class AuthService {
   public async registerEstabelecimento(data: any): Promise<Estabelecimento> {
     const {
       cnpj,
-      // ... (Removidos para simplificar o código, mas você pode mantê-los se precisar de validação)
       senha,
     } = data;
 
-    // 1. CRIPTOGRAFAÇÃO da Senha
     const hashedPassword = await bcrypt.hash(senha, 10);
 
-    // Prepara os dados com a senha criptografada
     const dataWithHashedPassword = {
       ...data,
       senha: hashedPassword,
     };
 
-    // 2. DELEGAÇÃO da Criação (com a lógica dos horários e catálogo)
-    // ✅ CORREÇÃO: Chama o EstabelecimentoService para lidar com a criação
     const estabelecimento = await EstabelecimentoService.createEstabelecimento(
       dataWithHashedPassword
     );
@@ -104,12 +98,12 @@ class AuthService {
     const estabelecimento = await Estabelecimento.findOne({ where: { email } });
 
     if (!estabelecimento) {
-      return null; // Estabelecimento não encontrado
+      return null;
     }
 
     const isPasswordValid = await bcrypt.compare(senha, estabelecimento.senha);
     if (!isPasswordValid) {
-      return null; // Senha inválida
+      return null;
     }
 
     const token = jwt.sign(
@@ -122,7 +116,6 @@ class AuthService {
       { expiresIn: "1h" }
     );
 
-    // Retornar dados do estabelecimento (sem a senha)
     const estabelecimentoData = {
       idestabelecimento: estabelecimento.idestabelecimento,
       email: estabelecimento.email,

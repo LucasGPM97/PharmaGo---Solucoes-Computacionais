@@ -16,7 +16,6 @@ export interface AddressData {
   complement?: string;
 }
 
-// CORREÇÃO: Mapeamento para o backend
 const mapToBackend = (address: AddressData, estabelecimentoId: number) => ({
   estabelecimento_idestabelecimento: estabelecimentoId,
   cep: address.cep.replace(/\D/g, ""),
@@ -24,14 +23,13 @@ const mapToBackend = (address: AddressData, estabelecimentoId: number) => ({
   numero: address.number,
   bairro: address.neighborhood,
   cidade: address.city,
-  estado: address.state, // Nome completo do estado
-  uf: address.state, // Sigla do estado
+  estado: address.state,
+  uf: address.state, 
   latitude: "0.0",
   longitude: "0.0",
   complemento: address.complement || null,
 });
 
-// CORREÇÃO: Mapeamento do backend para frontend
 const mapToFrontend = (
   data: EnderecoEstabelecimento
 ): AddressData & { idendereco_estabelecimento: number } => ({
@@ -41,11 +39,10 @@ const mapToFrontend = (
   number: data.numero,
   neighborhood: data.bairro,
   city: data.cidade,
-  state: data.uf, // Usa a UF do backend
+  state: data.uf,
   complement: data.complemento,
 });
 
-// CORREÇÃO: Todas as rotas agora usam o prefixo correto "/enderecos_estabelecimento"
 
 // 1. CREATE
 export const createEnderecoEstabelecimento = async (
@@ -69,9 +66,8 @@ export const createEnderecoEstabelecimento = async (
       payload,
     });
 
-    // CORREÇÃO: Rota correta com prefixo
     const response = await api.post<EnderecoEstabelecimento>(
-      `/enderecos_estabelecimento`, // ✅ CORRIGIDO: enderecos_estabelecimento (com s)
+      `/enderecos_estabelecimento`, 
       payload,
       {
         headers: {
@@ -119,9 +115,8 @@ export const updateEnderecoEstabelecimento = async (
       payload,
     });
 
-    // CORREÇÃO: Rota correta com prefixo
     const response = await api.put<EnderecoEstabelecimento>(
-      `/enderecos_estabelecimento/${idenderecoEstabelecimento}`, // ✅ CORRIGIDO
+      `/enderecos_estabelecimento/${idenderecoEstabelecimento}`,
       payload,
       {
         headers: {
@@ -167,9 +162,8 @@ export const getEnderecosByEstabelecimento = async (): Promise<
       estabelecimentoId
     );
 
-    // CORREÇÃO: Rota correta com prefixo e parâmetro correto
     const response = await api.get<EnderecoEstabelecimento[]>(
-      `/enderecos_estabelecimento/estabelecimento/${estabelecimentoId}`, // ✅ CORRIGIDO
+      `/enderecos_estabelecimento/estabelecimento/${estabelecimentoId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -187,7 +181,6 @@ export const getEnderecosByEstabelecimento = async (): Promise<
       url: error.config?.url,
     });
 
-    // Se for 404, pode ser que não existam endereços ainda - retorna array vazio
     if (error.response?.status === 404) {
       console.log(
         "ℹ️  Nenhum endereço encontrado (404), retornando array vazio"
@@ -209,9 +202,8 @@ export const getEnderecoById = async (
   }
 
   try {
-    // CORREÇÃO: Rota correta com prefixo
     const response = await api.get<EnderecoEstabelecimento>(
-      `/enderecos_estabelecimento/${idenderecoEstabelecimento}`, // ✅ CORRIGIDO
+      `/enderecos_estabelecimento/${idenderecoEstabelecimento}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -244,9 +236,8 @@ export const deleteEnderecoEstabelecimento = async (
   }
 
   try {
-    // CORREÇÃO: Rota correta com prefixo
     await api.delete(
-      `/enderecos_estabelecimento/${idenderecoEstabelecimento}`, // ✅ CORRIGIDO
+      `/enderecos_estabelecimento/${idenderecoEstabelecimento}`, 
       {
         headers: {
           Authorization: `Bearer ${token}`,

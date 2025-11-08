@@ -7,14 +7,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
-  ScrollView,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ClientStackParamList } from "../../navigation/ClientNavigator";
 import Header from "../../components/common/Header";
 import { getOrdersByUserId, Order } from "../../services/client/PedidoService";
-// 1. IMPORTAR HOOK/CONTEXTO DE AUTENTICAÇÃO
-import { getUserId } from "../../services/common/AuthService"; // 🚨 Substitua pelo caminho real do seu contexto
+import { getUserId } from "../../services/common/AuthService"; 
 import Footer from "../../components/common/Footer";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -32,15 +30,12 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [clienteId, setClienteId] = useState<string | null>(null);
-  // 2. ACESSAR O ID DO USUÁRIO LOGADO VIA CONTEXTO
 
-  const userId = getUserId(); // Assumindo que o objeto 'user' no contexto tem a propriedade 'id'
-
+  const userId = getUserId();
   useEffect(() => {
-    // 1a. Primeira etapa: Carregar o ID do usuário uma única vez
     const loadUserId = async () => {
       try {
-        const id = await getUserId(); // Assumindo que getUserId é assíncrono (Promise)
+        const id = await getUserId(); 
         setClienteId(id);
       } catch (e) {
         console.error("Erro ao carregar ID do usuário:", e);
@@ -48,9 +43,6 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
         setLoading(false);
       }
     };
-
-    // Se getUserId for síncrono, você pode simplificar isso:
-    // setClienteId(getUserId());
 
     loadUserId();
   }, []);
@@ -69,11 +61,9 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
       }
     };
 
-    // 2. A busca só ocorre quando o ID for carregado (e só uma vez)
     if (clienteId) {
       fetchOrders(clienteId);
     } else if (clienteId === null && !loading) {
-      // Se clienteId é null E já terminou de carregar (erro/deslogado)
       setError("Usuário não autenticado.");
       Alert.alert("Erro de Autenticação", "Por favor, faça login novamente.");
     }
@@ -116,7 +106,6 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <Header title="Meus Pedidos" showBackButton />
 
-      {/* 🛑 CORREÇÃO: REMOVIDA A SCROLLVIEW EXTERNA 🛑 */}
 
       {orders.length === 0 ? (
         <View style={styles.emptyListContainer}>
@@ -130,8 +119,6 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
           keyExtractor={(item) => String(item.id)}
           renderItem={renderOrderItem}
           contentContainerStyle={styles.listContent}
-          // Adicione 'flex: 1' ao estilo do container da FlatList se necessário,
-          // mas neste caso, o `styles.container` principal já deve ser suficiente.
         />
       )}
 
@@ -141,22 +128,18 @@ const MyOrdersScreen: React.FC<MyOrdersScreenProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // --- Estilos de Layout Principal e Correção ---
 
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB", // Cor do seu estilo "antigo"
+    backgroundColor: "#F9FAFB", 
   },
 
-  // Estilo usado para o contentContainerStyle da FlatList
   listContent: {
-    paddingHorizontal: 24, // Usando o padding do seu estilo "antigo" (scrollContent)
-    paddingTop: 16, // Adicionando um padding superior
-    flexGrow: 1, // Crucial para o FlatList ocupar o espaço
-    paddingBottom: FOOTER_HEIGHT + 24, // 🛑 CORREÇÃO: Compensação do Footer (70px) + padding inferior (24px)
+    paddingHorizontal: 24,
+    paddingTop: 16, 
+    flexGrow: 1, 
+    paddingBottom: FOOTER_HEIGHT + 24,
   },
-
-  // --- Estilos de Status e Mensagens ---
 
   loadingContainer: {
     flex: 1,
@@ -186,16 +169,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#6B7280",
   },
-
-  // --- Estilos de Componentes (Pedidos) ---
-
-  // Este será usado no renderItem
   orderCard: {
-    backgroundColor: "rgba(59, 130, 246, 0.1)", // Cor do seu estilo "antigo"
+    backgroundColor: "rgba(59, 130, 246, 0.1)", 
     padding: 16,
     borderRadius: 16,
     gap: 12,
-    marginBottom: 16, // Adicionado para dar espaço entre os cards
+    marginBottom: 16, 
   },
   orderContent: {
     flexDirection: "row",
@@ -220,12 +199,10 @@ const styles = StyleSheet.create({
     color: "#1F2937",
   },
   orderDetails: {
-    // Este pode ser usado para a data ou status
     fontSize: 14,
     color: "#6B7280",
   },
   statusDot: {
-    // Se for usar para status visual
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -234,11 +211,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6B7280",
   },
-
-  // --- Estilos de Componentes não utilizados pela FlatList (removidos ou adaptados) ---
-  // Removidos: statusBar, statusBarTime, statusBarIcons, header, headerTitle (pois você usa o componente <Header>)
-  // Removido: scrollView, scrollContent (pois estamos usando FlatList)
-  // Removido: section, sectionTitle, ordersList, historyList, historyItem (pois a FlatList substitui estas estruturas)
 });
 
 export default MyOrdersScreen;

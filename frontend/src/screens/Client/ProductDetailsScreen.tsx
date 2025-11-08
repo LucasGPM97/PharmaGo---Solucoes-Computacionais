@@ -15,8 +15,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import Header from "../../components/common/Header";
 import ProductImageWithOverlay from "../../components/common/ProductImage";
-
-// Importe a função da API
 import {
   getProductById,
   Product as ApiProduct,
@@ -25,9 +23,6 @@ import { CartService } from "../../services/client/CartService";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// =======================================================================
-// TIPAGEM DOS PARÂMETROS DA ROTA
-// =======================================================================
 type ProductDetailRouteParams = {
   product: {
     id: string;
@@ -51,9 +46,6 @@ type ProductDetailRouteProp = RouteProp<
   "ProductDetail"
 >;
 
-// =======================================================================
-// COMPONENTE PRINCIPAL
-// =======================================================================
 const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
   const route = useRoute<ProductDetailRouteProp>();
   const { product: productFromParams, storeId, storeName } = route.params;
@@ -61,24 +53,20 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [product, setProduct] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAdding, setIsAdding] = useState(false); // Novo estado de carregamento
+  const [isAdding, setIsAdding] = useState(false); 
   const [quantity, setQuantity] = useState(1);
 
-  // Buscar dados completos do produto
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
         setIsLoading(true);
 
-        // Tenta buscar da API
         const productData = await getProductById(productFromParams.id);
         setProduct(productData);
       } catch (err) {
         console.error("Erro ao buscar detalhes do produto:", err);
         setError("Erro ao carregar detalhes do produto");
 
-        // Fallback: usa os dados que vieram pelos parâmetros
-        // Mas precisamos mapear para o formato esperado
         setProduct({
           idcatalogoProduto: productFromParams.id,
           nome: productFromParams.name,
@@ -105,7 +93,6 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     fetchProductDetails();
   }, [productFromParams]);
-  // Funções de quantidade
   const increaseQuantity = () => {
     setQuantity((prev) => prev + 1);
   };
@@ -114,12 +101,9 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
     setQuantity((prev) => Math.max(1, prev - 1));
   };
 
-  // Adicionar ao carrinho
   const addToCart = async () => {
     if (!product || !product.disponibilidade || isAdding) return;
 
-    // Obtemos o ID do produto de catálogo.
-    // Usamos 'product.idcatalogoProduto' do seu objeto de estado.
     const idcatalogoProduto = product.idcatalogoProduto;
 
     if (!idcatalogoProduto) {
@@ -130,16 +114,11 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
     setIsAdding(true);
 
     try {
-      // 🚨 CHAMA A FUNÇÃO DO SERVICE
       await CartService.addItem(idcatalogoProduto, quantity);
 
-      // Feedback de sucesso
       alert(
         `${quantity} ${product.nome || product.name} adicionado(s) ao carrinho!`
       );
-
-      // Opcional: Navegar para o carrinho ou dar feedback visual
-      // navigation.navigate('CartScreen');
     } catch (error) {
       console.error("Erro ao adicionar ao carrinho:", error);
       alert("❌ Erro ao adicionar ao carrinho. Tente novamente.");
@@ -148,7 +127,6 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   };
 
-  // Abrir link da bula
   const openLeaflet = () => {
     if (!product?.link_bula) {
       alert("Link da bula não disponível");
@@ -156,11 +134,9 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
     console.log("Abrindo bula:", product.link_bula);
     alert(`Abrindo bula: ${product.link_bula}`);
-    // Aqui você pode usar Linking.openURL(product.link_bula) para abrir no navegador
     Linking.openURL(product.link_bula);
   };
 
-  // Componente Accordion
   const AccordionItem: React.FC<{
     title: string;
     children: React.ReactNode;
@@ -187,10 +163,6 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   };
 
-  // =======================================================================
-  // RENDERIZAÇÕES
-  // =======================================================================
-
   const renderProductImage = () => {
     if (!product) {
       return (
@@ -200,7 +172,6 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
       );
     }
 
-    // Crie o objeto product compatível com o componente
     const productForImage = {
       id: product.idcatalogoProduto || product.id,
       nome_comercial: product.nome_comercial || product.nome || product.name,
@@ -277,7 +248,7 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
     if (!product?.tarja && !product?.requer_receita) return null;
 
     let warningText = "";
-    let warningStyle = styles.warningInfo; // padrão
+    let warningStyle = styles.warningInfo;
 
     if (product.tarja) {
       const tarjaLower = product.tarja.toLowerCase();
@@ -344,12 +315,10 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const renderWarning = () => {
-    // Se não tiver produto, não renderiza nada
     if (!product) return null;
 
     return (
       <View style={styles.warningsContainer}>
-        {/* Warning principal - sempre aparece */}
         <View style={[styles.warningSection, styles.warningPrincipal]}>
           <Text style={styles.warningText}>
             {product.nome || product.name} É UM MEDICAMENTO. {"\n"}SEU USO PODE
@@ -359,10 +328,8 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* Warning de tarja/receita */}
         {renderTarjaWarning()}
 
-        {/* Warning de tipo de produto */}
         {renderTipoProdutoWarning()}
       </View>
     );
@@ -429,12 +396,11 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
         style={[
           styles.addToCartButton,
           (!product?.disponibilidade || isAdding) &&
-            styles.addToCartButtonDisabled, // ADICIONADO: || isAdding
+            styles.addToCartButtonDisabled, 
         ]}
         onPress={addToCart}
-        disabled={!product?.disponibilidade || isAdding} // ADICIONADO: || isAdding
+        disabled={!product?.disponibilidade || isAdding} 
       >
-        {/* NOVO: Mostra ActivityIndicator se estiver carregando */}
         {isAdding ? (
           <ActivityIndicator size="small" color="#FFFFFF" />
         ) : (
@@ -456,9 +422,6 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
     </View>
   );
 
-  // =======================================================================
-  // RENDER PRINCIPAL
-  // =======================================================================
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -507,9 +470,6 @@ const ProductDetail: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 };
 
-// =======================================================================
-// STYLES (mantenha os mesmos estilos, apenas adicione os novos)
-// =======================================================================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -677,10 +637,6 @@ const styles = StyleSheet.create({
     color: "#007AFF",
   },
   footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderTopWidth: 1,
     borderTopColor: "#E5E5E5",
@@ -706,59 +662,42 @@ const styles = StyleSheet.create({
   warningsContainer: {
     marginHorizontal: 16,
     marginTop: 24,
-    gap: 8, // Espaço entre os warnings
+    gap: 8, 
   },
-
-  // Estilo base para todos os warnings
   warningSection: {
     padding: 16,
     borderRadius: 12,
     borderLeftWidth: 4,
   },
-
   warningText: {
     fontSize: 12,
     lineHeight: 16,
     fontWeight: "500",
   },
-
-  // Warning PRINCIPAL (sempre amarelo)
   warningPrincipal: {
     backgroundColor: "rgba(255, 193, 7, 0.1)",
     borderLeftColor: "#FFC107",
   },
-
-  // Warning TARJA PRETA (medicamento controle especial)
   warningPreta: {
     backgroundColor: "rgba(33, 33, 33, 0.1)",
     borderLeftColor: "#212121",
   },
-
-  // Warning TARJA VERMELHA COM RESTRIÇÃO
   warningVermelhaRestricao: {
     backgroundColor: "rgba(198, 40, 40, 0.1)",
     borderLeftColor: "#C62828",
   },
-
-  // Warning TARJA VERMELHA (prescrição médica)
   warningVermelha: {
     backgroundColor: "rgba(229, 57, 53, 0.1)",
     borderLeftColor: "#E53935",
   },
-
-  // Warning TARJA AMARELA
   warningAmarela: {
     backgroundColor: "rgba(255, 160, 0, 0.1)",
     borderLeftColor: "#FFA000",
   },
-
-  // Warning GENÉRICO/INFORMAÇÃO (cinza)
   warningGenerico: {
     backgroundColor: "rgba(97, 97, 97, 0.1)",
     borderLeftColor: "#616161",
   },
-
-  // Warning INFO (azul - para informações gerais)
   warningInfo: {
     backgroundColor: "rgba(21, 101, 192, 0.1)",
     borderLeftColor: "#1565C0",
@@ -768,15 +707,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6",
     margin: 16,
     borderRadius: 16,
-    overflow: "hidden", // 🔥 IMPORTANTE para o borderRadius funcionar
+    overflow: "hidden",
   },
-
   productImageStyle: {
     width: "100%",
     height: "100%",
-    backgroundColor: "transparent", // Remove fundo padrão
+    backgroundColor: "transparent",
   },
-
   productImageInner: {
     width: "100%",
     height: "100%",

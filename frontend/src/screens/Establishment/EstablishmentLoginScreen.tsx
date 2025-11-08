@@ -54,7 +54,6 @@ const EstablishmentLoginScreen: React.FC<EstablishmentLoginScreenProps> = ({
       console.log("Token:", response.token);
       console.log("Estabelecimento:", response.estabelecimento);
 
-      // Verificar se os dados foram salvos
       const token = await getAuthToken();
       const establishmentId = await getEstablishmentId();
 
@@ -64,8 +63,6 @@ const EstablishmentLoginScreen: React.FC<EstablishmentLoginScreenProps> = ({
 
       Alert.alert("Sucesso", "Login realizado com sucesso!");
 
-      // Navegar para o app do estabelecimento
-      // Usamos getParent() para navegar entre navigators diferentes
       navigation.getParent()?.navigate("EstablishmentApp");
     } catch (error: any) {
       console.error("Erro detalhado no login:", error);
@@ -79,7 +76,6 @@ const EstablishmentLoginScreen: React.FC<EstablishmentLoginScreenProps> = ({
         "Ocorreu um erro ao tentar fazer login. Verifique suas credenciais e tente novamente.";
 
       if (error.response) {
-        // Erro da API
         if (error.response.status === 401) {
           errorMessage = "Credenciais inválidas. Verifique seu email e senha.";
         } else if (error.response.status === 404) {
@@ -88,7 +84,6 @@ const EstablishmentLoginScreen: React.FC<EstablishmentLoginScreenProps> = ({
           errorMessage = error.response.data?.message || errorMessage;
         }
       } else if (error.request) {
-        // Erro de rede
         errorMessage =
           "Erro de conexão. Verifique sua internet e tente novamente.";
       }
@@ -102,7 +97,6 @@ const EstablishmentLoginScreen: React.FC<EstablishmentLoginScreenProps> = ({
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerImageContainer}>
-        {/* Placeholder for image */}
         <Image
           source={require("../../../design_references/establishment_login_screen.webp")}
           style={styles.headerImage}

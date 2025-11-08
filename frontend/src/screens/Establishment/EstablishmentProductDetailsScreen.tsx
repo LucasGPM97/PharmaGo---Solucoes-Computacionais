@@ -954,7 +954,6 @@ const styles = StyleSheet.create({
   productsList: { padding: 16, gap: 16, paddingBottom: 20, minHeight: 200 },
   productCard: { borderRadius: 12, padding: 16, gap: 16 },
   productHeader: { flexDirection: "row", gap: 16 },
-  // Estilos atualizados para a imagem
   productImageContainer: {
     width: 80,
     height: 100,

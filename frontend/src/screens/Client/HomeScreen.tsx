@@ -8,23 +8,19 @@ import {
   Dimensions,
   Modal,
   TouchableWithoutFeedback,
-  ActivityIndicator, // Adicionado para loading
+  ActivityIndicator, 
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import Footer from "../../components/common/Footer";
 import Header from "../../components/common/Header";
-
-// 🚨 Importe o Service: Ajuste o caminho conforme a localização do seu arquivo de serviço
 import { storeService } from "../../services/establishment/storeService";
-
 import { Estabelecimento } from "../../types";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// Adaptação dos tipos para usar os dados da API
 type Store = Estabelecimento & {
-  id: string; // Usaremos idestabelecimento como string para ID
+  id: string; 
   nome: string;
   distance: string;
   deliveryTime: string;
@@ -53,33 +49,29 @@ const MobileApp: React.FC<{ navigation: NavigationProps }> = ({
   });
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
-  // 1. NOVOS ESTADOS PARA DADOS DA API
   const [apiStores, setApiStores] = useState<Store[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Dados mockados de slides
   const slides = Array(5).fill(null);
 
-  // Função de mapeamento dos dados da API para o formato de UI (Store)
   const mapApiToStore = (apiData: Estabelecimento[]): Store[] => {
     return apiData.map((item) => ({
       ...item,
       id: item.idestabelecimento.toString(),
       nome: item.razao_social,
-      distance: item.distancia || "2km", // Assumindo que a API retorna isso formatado
-      deliveryTime: item.tempo_entrega || "30 min", // Assumindo que a API retorna isso formatado
-      isOpen: item.aberto, // Assumindo que a API retorna isso
+      distance: item.distancia || "2km",
+      deliveryTime: item.tempo_entrega || "30 min", 
+      isOpen: item.aberto,
     }));
   };
 
-  // 2. FUNÇÃO PARA BUSCAR ESTABELECIMENTOS NA API
   const fetchStores = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const data = await storeService.getAllStores();
-      const mappedStores = mapApiToStore(data as Estabelecimento[]); // Use 'as Estabelecimento[]' se o tipo for necessário
+      const mappedStores = mapApiToStore(data as Estabelecimento[]); 
       setApiStores(mappedStores);
       console.log(data);
     } catch (e) {
@@ -91,14 +83,12 @@ const MobileApp: React.FC<{ navigation: NavigationProps }> = ({
     }
   }, []);
 
-  // 3. CHAMADA DA API NA MONTAGEM DO COMPONENTE
   useEffect(() => {
     fetchStores();
   }, [fetchStores]);
 
-  // Filtrar e ordenar a lista REAL
   const getFilteredAndSortedStores = () => {
-    let filteredStores = [...apiStores]; // Usa o estado da API, não o mock
+    let filteredStores = [...apiStores]; 
 
     // Aplicar filtros
     if (filters.isOpen !== null) {
@@ -110,13 +100,11 @@ const MobileApp: React.FC<{ navigation: NavigationProps }> = ({
     // Aplicar ordenação
     switch (sortOption) {
       case "distance":
-        // ⚠️ A ordenação por distância agora depende de distância formatada
         filteredStores.sort(
           (a, b) => parseFloat(a.distance) - parseFloat(b.distance)
         );
         break;
       case "deliveryTime":
-        // ⚠️ A ordenação por tempo de entrega agora depende de tempo_entrega formatado
         filteredStores.sort(
           (a, b) => parseInt(a.deliveryTime) - parseInt(b.deliveryTime)
         );
@@ -131,23 +119,19 @@ const MobileApp: React.FC<{ navigation: NavigationProps }> = ({
 
   const filteredStores = getFilteredAndSortedStores();
 
-  // 4. MOCK DE ÚLTIMOS ESTABELECIMENTOS (agora baseado nos dados da API)
   const lastStores = apiStores.slice(0, 4).map((store) => ({
     id: store.idestabelecimento,
     name: store.nome,
   }));
 
-  // 5. ATUALIZAÇÃO DA NAVEGAÇÃO para passar os dados
   const navigateToStore = (store: Store) => {
     console.log(`Navegando para loja: ${store.nome} (ID: ${store.id})`);
 
-    // 🚨 PASSANDO O ID E DEMAIS DADOS DO ESTABELECIMENTO PARA A PRÓXIMA TELA
     navigation.navigate("EstablishmentDetails", {
       storeId: store.id,
       storeName: store.nome,
       storeDistance: store.distance,
       storeDeliveryTime: store.deliveryTime,
-      // Você pode passar o objeto Store inteiro se quiser
       storeData: store,
     });
     alert(`Navegando para: ${store.nome}`);
@@ -204,12 +188,10 @@ const MobileApp: React.FC<{ navigation: NavigationProps }> = ({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.lastStoresScroll}
       >
-        {/* Usando os dados reais ou mockados baseados nos reais */}
         {lastStores.map((store) => (
           <TouchableOpacity
             key={store.id}
             style={styles.storeCard}
-            // 🚨 Passando o objeto Store completo (ou reconstruindo ele se quiser)
             onPress={() =>
               navigateToStore(
                 apiStores.find((s) => s.idestabelecimento === store.id) as Store
@@ -719,7 +701,6 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     marginBottom: 2,
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -766,7 +747,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#007AFF",
   },
-  // Filter Modal Styles
   filterSection: {
     marginBottom: 24,
   },

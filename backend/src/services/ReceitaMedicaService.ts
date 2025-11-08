@@ -1,17 +1,15 @@
 import ReceitaMedica from "../models/ReceitaMedica";
-import { Transaction } from "sequelize"; // Adicionando import para tipagem se necessário
+import { Transaction } from "sequelize"; 
 
-// Tipo de dados mais seguro e completo para a criação
 interface ReceitaMedicaCreationData {
   pedido_idpedido: number;
-  cliente_idcliente: number; // O ID do usuário que faz o upload (cliente)
-  caminho_documento: string; // O URL/path de upload
-  nome_arquivo: string; // O nome original do arquivo
-  status_receita?: string; // Opcional, default 'pendente'
+  cliente_idcliente: number; 
+  caminho_documento: string; 
+  nome_arquivo: string; 
+  status_receita?: string;
 }
 
 class ReceitaMedicaService {
-  // 🚨 Função atualizada para incluir cliente_idcliente e nome_arquivo e usar tipos fortes
   public async createReceitaMedica(
     data: ReceitaMedicaCreationData,
     t?: Transaction
@@ -29,15 +27,14 @@ class ReceitaMedicaService {
         `📝 Registrando receita para Pedido ${pedido_idpedido} (Cliente ${cliente_idcliente})`
       );
 
-      // Usa status_receita se fornecido, caso contrário, 'pendente'
       const status = status_receita || "pendente";
 
       const receitaMedica = await ReceitaMedica.create(
         {
           pedido_idpedido,
-          cliente_idcliente, // 🎯 NOVO CAMPO
+          cliente_idcliente,
           caminho_documento,
-          nome_arquivo, // 🎯 NOVO CAMPO
+          nome_arquivo, 
           status_receita: status,
         },
         { transaction: t }
@@ -46,14 +43,12 @@ class ReceitaMedicaService {
       return receitaMedica;
     } catch (error) {
       console.error("❌ Erro em createReceitaMedica Service:", error);
-      // Lança um erro customizado para o Controller/Route
       throw new Error(
         "Falha ao registrar a receita médica. Verifique os dados fornecidos."
       );
     }
   }
 
-  // ... (Os demais métodos findById, findByPedidoId, update, delete permanecem iguais)
 
   public async getReceitaMedicaById(
     idreceita_medica: string

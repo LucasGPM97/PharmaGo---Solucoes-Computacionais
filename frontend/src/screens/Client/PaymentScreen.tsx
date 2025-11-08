@@ -36,7 +36,6 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ navigation }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Mock user and establishment IDs for now
   const userId = "user123";
   const establishmentId = "establishment456";
 

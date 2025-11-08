@@ -11,7 +11,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { EstablishmentStackParamList } from "../../navigation/EstablishmentNavigator";
 import Header from "../../components/common/Header";
-import ProductImageWithOverlay from "../../components/common/ProductImage"; //
 type EstablishmentHomeScreenNavigationProp = StackNavigationProp<
   EstablishmentStackParamList,
   "ManageProducts"

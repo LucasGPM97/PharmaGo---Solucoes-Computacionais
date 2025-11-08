@@ -3,7 +3,6 @@ import { AuthResponse } from "../../types";
 import { Cliente, Estabelecimento } from "../../types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Tipos de resposta do backend (ajustados para serem mais limpos)
 interface ClientLoginResponse {
   token: string;
   cliente: Cliente;
@@ -14,7 +13,6 @@ interface EstablishmentLoginResponse {
   estabelecimento: Estabelecimento;
 }
 
-// Funções de Login e Registro
 
 export const loginClient = async (
   emailOrCnpj: string,
@@ -26,7 +24,6 @@ export const loginClient = async (
       senha: password,
     });
 
-    // Salvar token e dados do cliente
     await saveAuthData(
       response.data.token,
       response.data.cliente.idcliente,
@@ -61,7 +58,6 @@ export const loginEstablishment = async (
       }
     );
 
-    // Salvar token e dados do estabelecimento
     await saveAuthData(
       response.data.token,
       response.data.estabelecimento.idestabelecimento,
@@ -88,17 +84,13 @@ export const registerEstablishment = async (
   return response.data;
 };
 
-// Funções de Gerenciamento de Autenticação (Mantidas no comum)
-
-// Salvar todos os dados de autenticação
 export const saveAuthData = async (
   token: string,
-  userId: number, // Alterado para number
+  userId: number, 
   userData: Cliente | Estabelecimento,
   userType: "cliente" | "estabelecimento"
 ): Promise<void> => {
   try {
-    // Converter tudo para string (AsyncStorage só aceita strings)
     const userIdString = String(userId);
     const userDataString = JSON.stringify(userData);
 
@@ -114,7 +106,6 @@ export const saveAuthData = async (
   }
 };
 
-// Obter token
 export const getAuthToken = async (): Promise<string | null> => {
   try {
     const token = await AsyncStorage.getItem("authToken");
@@ -125,7 +116,6 @@ export const getAuthToken = async (): Promise<string | null> => {
   }
 };
 
-// Obter ID do usuário
 export const getUserId = async (): Promise<string | null> => {
   try {
     const userId = await AsyncStorage.getItem("userId");
@@ -136,7 +126,6 @@ export const getUserId = async (): Promise<string | null> => {
   }
 };
 
-// Obter tipo do usuário
 export const getUserType = async (): Promise<
   "cliente" | "estabelecimento" | null
 > => {
@@ -151,7 +140,6 @@ export const getUserType = async (): Promise<
   }
 };
 
-// Obter dados do usuário
 export const getUserData = async (): Promise<
   Cliente | Estabelecimento | null
 > => {
@@ -164,7 +152,6 @@ export const getUserData = async (): Promise<
   }
 };
 
-// Verificar se está autenticado
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
     const token = await getAuthToken();
@@ -176,7 +163,6 @@ export const isAuthenticated = async (): Promise<boolean> => {
   }
 };
 
-// Remover todos os dados (logout)
 export const clearAuthData = async (): Promise<void> => {
   try {
     await AsyncStorage.multiRemove([
@@ -184,8 +170,8 @@ export const clearAuthData = async (): Promise<void> => {
       "userId",
       "userType",
       "userData",
-      "establishmentId", // manter por compatibilidade
-      "establishmentData", // manter por compatibilidade
+      "establishmentId", 
+      "establishmentData", 
     ]);
     console.log("✅ Dados de autenticação removidos com sucesso");
   } catch (error) {
@@ -194,7 +180,6 @@ export const clearAuthData = async (): Promise<void> => {
   }
 };
 
-// Funções de compatibilidade (mantidas para não quebrar código existente)
 export const getEstablishmentId = async (): Promise<string | null> => {
   const userType = await getUserType();
   if (userType === "estabelecimento") {

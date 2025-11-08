@@ -2,6 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/database";
 import Carrinho from "./Carrinho";
 import CatalogoProduto from "./CatalogoProduto";
+import Produto from "./Produto";
 
 class CarrinhoItem extends Model {
   public idcarrinho_item!: number;
@@ -12,6 +13,7 @@ class CarrinhoItem extends Model {
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public catalogo_produto!: CatalogoProduto;
+  public produto!: Produto;
 }
 
 CarrinhoItem.init(

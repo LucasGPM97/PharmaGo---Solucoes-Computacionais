@@ -42,16 +42,13 @@ class CatalogoProdutoController {
 
       const catalogoProdutos =
         await CatalogoProdutoService.getProdutosByCatalogo(
-          // ❌ ERA: Number(req.params.catalogo_idcatalogo)
-          // ✅ CORRIGIDO: Usa o nome correto do parâmetro da rota
           Number(req.params.idestabelecimento)
         );
-      // 🎯 LOG MAIS IMPORTANTE: Mostra o que o Sequelize retornou
       console.log("-----------------------------------------");
       console.log(
         `Dados retornados do Service para idEstabelecimento ${idEstabelecimento}:`
       );
-      console.log(JSON.stringify(catalogoProdutos, null, 2)); // Use JSON.stringify(..., null, 2) para formatação legível
+      console.log(JSON.stringify(catalogoProdutos, null, 2)); 
       console.log("-----------------------------------------");
       return res.status(200).json(catalogoProdutos);
     } catch (error: any) {
@@ -61,15 +58,12 @@ class CatalogoProdutoController {
 
   public async update(req: Request, res: Response): Promise<Response> {
     try {
-      // ✅ CORREÇÃO 1: Usar o parâmetro correto da rota
       const idcatalogo_produto_param = Number(req.params.idcatalogo_produto);
 
-      // O corpo (body) contém { valor_venda, disponibilidade }
       const data = req.body;
 
       const [affectedCount] =
         await CatalogoProdutoService.updateCatalogoProduto(
-          // ✅ CORREÇÃO 2: Passar o ID da rota
           idcatalogo_produto_param,
           data
         );
@@ -83,18 +77,13 @@ class CatalogoProdutoController {
           });
       }
 
-      // Buscamos o produto atualizado.
-      // O frontend espera o objeto completo de volta (embora a busca seja opcional se o Service retornar o objeto)
       const updatedCatalogoProduto =
         await CatalogoProdutoService.getCatalogoProdutoById(
           idcatalogo_produto_param
         );
 
-      // 🚀 O service frontend espera a resposta do item atualizado.
-      // Se a sua API retorna o objeto completo do CatalogoProduto, isso funciona.
       return res.status(200).json(updatedCatalogoProduto);
     } catch (error: any) {
-      // Captura erros de validação ou de banco de dados
       return res
         .status(400)
         .json({

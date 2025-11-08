@@ -41,7 +41,6 @@ class PedidoService {
   public async getPedidoById(idpedido: number): Promise<Pedido | null> {
     const pedido = await Pedido.findByPk(idpedido, {
       include: [
-        // 1. Itens do Pedido (Já corrigido o alias para 'pedido_itens')
         {
           model: PedidoItem,
           as: "pedido_itens",
@@ -53,11 +52,8 @@ class PedidoService {
             },
           ],
         },
-        // 2. Estabelecimento (para o cabeçalho)
         { model: Estabelecimento, as: "estabelecimento" },
-        // 3. Endereço do Cliente (para a seção de endereço)
         { model: EnderecoCliente, as: "endereco_cliente" },
-        // 4. Forma de Pagamento (para a seção de pagamento)
         { model: FormaPagamento, as: "forma_pagamento" },
       ],
     });
@@ -126,7 +122,7 @@ class PedidoService {
             as: "forma_pagamento",
           },
         ],
-        order: [["data_pedido", "DESC"]], // Ordena por data mais recente
+        order: [["data_pedido", "DESC"]],
       });
 
       console.log(`[DEBUG] Pedidos encontrados: ${pedidos.length}`);
@@ -158,9 +154,6 @@ class PedidoService {
     return deletedRows;
   }
 
-  // -----------------------------------------------------------------
-  // NOVO MÉTODO: CRIAÇÃO DO PEDIDO A PARTIR DO CARRINHO (CHECKOUT)
-  // -----------------------------------------------------------------
   public async criarPedidoDoCarrinho(
     clienteId: number,
     carrinhoId: number,
@@ -168,18 +161,20 @@ class PedidoService {
       endereco_cliente_idendereco_cliente: number;
       forma_pagamento_idforma_pagamento: number;
       observacoes?: string;
-    } // Use DTO mais específico na produção
+    }
   ): Promise<Pedido> {
-    // 1. Inicia a Transação
     const t: Transaction = await sequelize.transaction();
 
     try {
-      // A. Busca os Itens do Carrinho
       const itensCarrinho = await CarrinhoService.getCarrinhoCompleto(
         clienteId
       );
 
-      if (!itensCarrinho || itensCarrinho.carrinho_item?.length === 0) {
+      if (
+        !itensCarrinho ||
+        !itensCarrinho.carrinho_item ||
+        itensCarrinho.carrinho_item.length === 0
+      ) {
         throw new Error(
           "O carrinho está vazio ou não existe para este cliente."
         );
@@ -187,18 +182,63 @@ class PedidoService {
 
       const itensParaClonar = itensCarrinho.carrinho_item;
 
-      // B. Valida a Regra de Negócio (Um estabelecimento por pedido)
-      // Já garantimos que o Carrinho só tem itens de um estabelecimento.
-      // Precisamos apenas pegar o ID desse estabelecimento.
       const primeiroItem = itensParaClonar[0];
       const estabelecimentoId =
         primeiroItem.catalogo_produto.catalogo
           .estabelecimento_idestabelecimento;
 
-      // C. Calcula o Valor Total Final (O total no Carrinho já deve estar correto)
-      const valorTotal = itensCarrinho.total; // Assumimos que a taxa de entrega/etc. é calculada no Controller/Front e passada aqui, ou recalculada aqui. Por simplicidade, usaremos o total do Carrinho.
+      let subtotalRecalculado = 0;
 
-      // D. Cria o Pedido Principal (Header)
+      itensParaClonar.forEach((item: any) => {
+        const valorUnitario =
+          typeof item.catalogo_produto.valor_venda === "string"
+            ? parseFloat(item.catalogo_produto.valor_venda)
+            : item.catalogo_produto.valor_venda;
+
+        const quantidade = item.quantidade;
+        subtotalRecalculado += valorUnitario * quantidade;
+      });
+
+      subtotalRecalculado = Math.round(subtotalRecalculado * 100) / 100;
+
+      const estabelecimentoData =
+        primeiroItem.catalogo_produto.catalogo.estabelecimento;
+      const taxaEntrega = estabelecimentoData?.taxa_entrega
+        ? typeof estabelecimentoData.taxa_entrega === "string"
+          ? parseFloat(estabelecimentoData.taxa_entrega)
+          : estabelecimentoData.taxa_entrega
+        : 0;
+
+      const valorMinimoEntrega = estabelecimentoData?.valor_minimo_entrega
+        ? typeof estabelecimentoData.valor_minimo_entrega === "string"
+          ? parseFloat(estabelecimentoData.valor_minimo_entrega)
+          : estabelecimentoData.valor_minimo_entrega
+        : 0;
+
+      const taxaAplicada =
+        subtotalRecalculado >= valorMinimoEntrega ? 0.0 : taxaEntrega;
+      const valorTotalRecalculado = subtotalRecalculado + taxaAplicada;
+
+      console.log("💰 Valores do Pedido:", {
+        subtotal: subtotalRecalculado,
+        taxaEntregaConfigurada: taxaEntrega,
+        valorMinimoEntrega: valorMinimoEntrega,
+        taxaAplicada: taxaAplicada,
+        totalFinal: valorTotalRecalculado,
+        totalDoCarrinhoAntigo: itensCarrinho.total,
+        itens: itensParaClonar.map((item: any) => ({
+          produto:
+            item.catalogo_produto.produto?.nome_comercial ||
+            "Produto não encontrado",
+          preco: item.catalogo_produto.valor_venda,
+          quantidade: item.quantidade,
+          subtotal:
+            (typeof item.catalogo_produto.valor_venda === "string"
+              ? parseFloat(item.catalogo_produto.valor_venda)
+              : item.catalogo_produto.valor_venda) * item.quantidade,
+        })),
+      });
+
       const novoPedido = await Pedido.create(
         {
           cliente_idcliente: clienteId,
@@ -207,17 +247,19 @@ class PedidoService {
             dadosAdicionais.endereco_cliente_idendereco_cliente,
           forma_pagamento_idforma_pagamento:
             dadosAdicionais.forma_pagamento_idforma_pagamento,
-          status: "Aguardando Pagamento", // Status inicial após checkout
-          valor_total: valorTotal,
+          status: "Aguardando Pagamento",
+          valor_total: valorTotalRecalculado,
           observacoes: dadosAdicionais.observacoes,
-          // REMOVEMOS carrinho_idcarrinho conforme combinado
         },
         { transaction: t }
       );
 
-      // E. Clona os Itens para PedidoItem (Detalhe/Imutável)
-      const itensPedidoParaCriar = itensParaClonar.map((item) => {
-        const valorUnitarioVenda = item.catalogo_produto.valor_venda;
+      const itensPedidoParaCriar = itensParaClonar.map((item: any) => {
+        const valorUnitarioVenda =
+          typeof item.catalogo_produto.valor_venda === "string"
+            ? parseFloat(item.catalogo_produto.valor_venda)
+            : item.catalogo_produto.valor_venda;
+
         const quantidade = item.quantidade;
 
         return {
@@ -231,20 +273,16 @@ class PedidoService {
       });
 
       await PedidoItem.bulkCreate(itensPedidoParaCriar, { transaction: t });
-
-      // F. Limpa/Finaliza o Carrinho
       await CarrinhoService.limparCarrinhoTransacional(carrinhoId, t);
-
-      // G. Confirma a Transação
       await t.commit();
 
-      console.log(
-        "✅ Pedido criado e itens clonados com sucesso:",
-        novoPedido.idpedido
-      );
+      console.log("✅ Pedido criado com valor correto:", {
+        pedidoId: novoPedido.idpedido,
+        valorTotal: valorTotalRecalculado,
+      });
+
       return novoPedido;
     } catch (error) {
-      // H. Desfaz tudo em caso de falha
       await t.rollback();
       console.error("❌ Erro durante o processo de checkout:", error);
       throw error;

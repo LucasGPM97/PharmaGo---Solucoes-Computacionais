@@ -6,7 +6,6 @@ class ClienteController {
   public async create(req: Request, res: Response): Promise<Response> {
     try {
       const cliente = await ClienteService.createCliente(req.body);
-      // 2. Criar carrinho automaticamente
       return res.status(201).json(cliente);
     } catch (error: any) {
       return res.status(400).json({ message: error.message });

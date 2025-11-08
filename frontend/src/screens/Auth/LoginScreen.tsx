@@ -34,7 +34,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // LoginScreen.tsx - Atualize o handleLogin
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Erro", "Por favor, preencha todos os campos");
@@ -54,7 +53,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       console.log("Token:", response.token);
       console.log("Cliente:", response.cliente);
 
-      // Verificar se os dados foram salvos
       const token = await getAuthToken();
       const establishmentId = await getClientId();
 
@@ -64,8 +62,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       Alert.alert("Sucesso", "Login realizado com sucesso!");
 
-      // Navegar para o app do estabelecimento
-      // Usamos getParent() para navegar entre navigators diferentes
       navigation.getParent()?.navigate("App");
     } catch (error: any) {
       console.error("Erro detalhado no login:", error);

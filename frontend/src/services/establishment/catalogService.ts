@@ -1,15 +1,9 @@
-// Imports necessários (ajuste o caminho se necessário)
 import api from "../../api/api";
 import {
   getAuthToken,
   getEstablishmentId,
 } from "../../services/common/AuthService";
 
-// --------------------------------------------------------------------------------
-// TIPOS (Ajustado para refletir o seu log)
-// --------------------------------------------------------------------------------
-
-// Tipo para os dados de cadastro do produto no Catálogo
 export interface CatalogoRegistrationData {
   produto_idproduto: number;
   catalogo_idcatalogo: number;
@@ -17,22 +11,20 @@ export interface CatalogoRegistrationData {
   disponibilidade: boolean;
 }
 
-// Tipo para os dados de ATUALIZAÇÃO do Catálogo
 export interface CatalogoUpdateData {
-  valor_venda?: number; // Opcional, pois pode ser só a disponibilidade
-  disponibilidade?: boolean; // Opcional, pois pode ser só o valor
+  valor_venda?: number; 
+  disponibilidade?: boolean; 
 }
 
-// Tipos para os dados do Frontend
 export interface Product {
   nome_comercial: string;
   classe_terapeutica: string;
-  idcatalogoProduto: string; // ✅ Renomeado para clareza (ID do item do catálogo)
+  idcatalogoProduto: string; 
   nome: string;
   detentor_registro: string;
   registro_anvisa: string;
-  valor_venda_display: string; // ✅ Alterado para 'display'
-  valor_venda_numerico: number; // ✅ Novo campo para o valor real
+  valor_venda_display: string; 
+  valor_venda_numerico: number;
   preco_cmed: string;
   substancia_ativa: string;
   disponibilidade: boolean;
@@ -41,18 +33,16 @@ export interface Product {
   isEditing?: boolean;
 }
 
-// Resposta esperada da API
 export interface ApiProductResponse {
   idcatalogo_produto: number;
-  valor_venda: string; // ✅ É uma string (DECIMAL) no seu log
+  valor_venda: string; 
   disponibilidade: boolean;
   produto: {
-    // ✅ CORRETO: O objeto aninhado se chama 'produto'
     idproduto: number;
-    nome_comercial: string; // ✅ Campo correto do seu log
+    nome_comercial: string;
     registro_anvisa: string;
-    detentor_registro: string; // ✅ Campo correto do seu log
-    preco_cmed: string; // ✅ É uma string no seu log
+    detentor_registro: string; 
+    preco_cmed: string;
     substancia_ativa: string;
     link_bula: string;
     classe_terapeutica: string;
@@ -61,26 +51,18 @@ export interface ApiProductResponse {
     requer_receita: boolean;
     tarja: string;
   };
-  // ... outros campos do CatalogoProduto
 }
 
 interface CatalogoProdutoResponse {
   idcatalogo_produto: number;
-  // ...
 }
 
-// --------------------------------------------------------------------------------
-// FUNÇÕES AUXILIARES DE PREÇO (Essenciais para resolver o TypeError)
-// --------------------------------------------------------------------------------
-
-// Converte string de API para valor numérico (útil para cálculos)
 const parsePrice = (value: string | number | undefined | null): number => {
   const rawValue = String(value || 0).replace(",", ".");
   const numValue = parseFloat(rawValue);
   return isNaN(numValue) ? 0 : numValue;
 };
 
-// Formata valor da API (string/number) para a string de exibição "R$ X,XX"
 const formatPrice = (value: string | number | undefined | null): string => {
   const numValue = parsePrice(value);
 
@@ -91,9 +73,6 @@ const formatPrice = (value: string | number | undefined | null): string => {
   return `R$ ${numValue.toFixed(2).replace(".", ",")}`;
 };
 
-// --------------------------------------------------------------------------------
-// FUNÇÃO 1: BUSCAR PRODUTOS (Corrigida)
-// --------------------------------------------------------------------------------
 
 export const getCatalogProducts = async (): Promise<Product[]> => {
   const token = await getAuthToken();
@@ -113,27 +92,23 @@ export const getCatalogProducts = async (): Promise<Product[]> => {
       }
     );
 
-    // 2. Mapeia a resposta da API com os CAMINHOS CORRETOS
     const formattedProducts: Product[] = response.data.map((apiItem) => ({
       idcatalogoProduto: apiItem.idcatalogo_produto.toString(),
       disponibilidade: apiItem.disponibilidade,
 
-      // PREÇOS
       valor_venda_display: formatPrice(apiItem.valor_venda),
-      valor_venda_numerico: parsePrice(apiItem.valor_venda), // Valor para o input de edição
+      valor_venda_numerico: parsePrice(apiItem.valor_venda), 
       preco_cmed: formatPrice(apiItem.produto.preco_cmed),
 
-      // DADOS DO PRODUTO (Aninhados corretamente em apiItem.produto)
-      nome: apiItem.produto.nome_comercial, // ✅ CORRETO
-      detentor_registro: apiItem.produto.detentor_registro, // ✅ CORRETO
-      registro_anvisa: apiItem.produto.registro_anvisa, // ✅ CORRETO
+      nome: apiItem.produto.nome_comercial,
+      detentor_registro: apiItem.produto.detentor_registro, 
+      registro_anvisa: apiItem.produto.registro_anvisa, 
       substancia_ativa: apiItem.produto.substancia_ativa,
       link_bula: apiItem.produto.link_bula,
       classe_terapeutica: apiItem.produto.classe_terapeutica,
       tarja: apiItem.produto.tarja,
       tipo_produto: apiItem.produto.tipo_produto,
 
-      // ESTADOS DE UI
       isExpanded: false,
       isEditing: false,
     }));
@@ -145,14 +120,9 @@ export const getCatalogProducts = async (): Promise<Product[]> => {
   }
 };
 
-// --------------------------------------------------------------------------------
-// FUNÇÃO 2: REGISTRAR PRODUTO NO CATÁLOGO (Mantida)
-// --------------------------------------------------------------------------------
-
 export const registerProductToCatalog = async (
   data: CatalogoRegistrationData
 ): Promise<CatalogoProdutoResponse> => {
-  // ... (código que você forneceu, mantido intacto)
   const token = await getAuthToken();
 
   if (!token) {
@@ -191,10 +161,6 @@ export const registerProductToCatalog = async (
   }
 };
 
-// --------------------------------------------------------------------------------
-// FUNÇÃO 3: ATUALIZAR ITEM DO CATÁLOGO (NOVA)
-// --------------------------------------------------------------------------------
-
 /**
  * Atualiza o preço de venda ou a disponibilidade de um item específico do catálogo.
  * @param idcatalogoProduto O ID do item na tabela CatalogoProduto (ex: '2', '3', '4').
@@ -210,7 +176,6 @@ export const updateCatalogItem = async (
     throw new Error("Token de autenticação não encontrado.");
   }
 
-  // O payload inclui apenas os campos que você deseja atualizar
   const payload = {
     ...(data.valor_venda !== undefined && { valor_venda: data.valor_venda }),
     ...(data.disponibilidade !== undefined && {
@@ -223,7 +188,6 @@ export const updateCatalogItem = async (
   }
 
   try {
-    // Rota de PATCH: '/catalogo-produtos/:idcatalogoProduto'
     const response = await api.patch<CatalogoProdutoResponse>(
       `/catalogo-produtos/${idcatalogoProduto}`,
       payload,
@@ -258,7 +222,6 @@ export const deleteCatalogItem = async (
   }
 
   try {
-    // Rota de DELETE: '/catalogo-produtos/:idcatalogoProduto'
     await api.delete(`/catalogo-produtos/${idcatalogoProduto}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -277,32 +240,26 @@ export const getCatalogProducts2 = async (
   storeId: string
 ): Promise<Product[]> => {
   try {
-    const token = await getAuthToken(); // Pega o token
+    const token = await getAuthToken(); 
 
-    // 🚨 VERIFIQUE ESTA LINHA:
-    // A rota deve incluir o storeId se a API exigir
     const response = await api.get<Product[]>(
       `/catalogo-produtos/estabelecimento/${storeId}`,
       {
-        // ⚠️ ASSUME ESTE FORMATO DE ROTA
         headers: {
-          Authorization: `Bearer ${token}`, // ⚠️ VERIFIQUE SE O TOKEN ESTÁ AQUI
+          Authorization: `Bearer ${token}`, 
         },
       }
     );
 
-    // Garantir que a requisição só é bem-sucedida se o status for 2xx
     return response.data;
   } catch (error: any) {
-    console.error("Erro ao buscar produtos do catálogo:", error); // Este é o seu log
-    // 🛑 PARA EVITAR O CRASH: Retorne um array vazio aqui.
+    console.error("Erro ao buscar produtos do catálogo:", error); 
     return [];
   }
 };
 
 export const getProductById = async (productId: string): Promise<Product> => {
   try {
-    // Validação robusta do ID
     if (!productId || productId === "undefined" || productId === "null") {
       throw new Error("ID do produto inválido: " + productId);
     }

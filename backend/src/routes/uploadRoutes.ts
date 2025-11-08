@@ -115,11 +115,10 @@ router.post(
   },
 );
 
-// CORRIJA a ordem - authMiddleware DEVE vir depois do upload
 router.post(
   "/receita",
-  upload.single("receitaFile"), // ⬅️ Upload PRIMEIRO
-  authMiddleware,               // ⬅️ Auth DEPOIS
+  upload.single("receitaFile"),
+  authMiddleware,               
   async (req: Request, res: Response) => {
     try {
       if (!req.file) {
@@ -129,7 +128,6 @@ router.post(
 
       console.log(`✅ Upload Receita: Arquivo recebido: ${req.file.filename}`);
       
-      // Agora req.user deve estar populado
       console.log('🔍 USER OBJECT:', (req as any).user);
       
       const userId = (req as any).user?.id;

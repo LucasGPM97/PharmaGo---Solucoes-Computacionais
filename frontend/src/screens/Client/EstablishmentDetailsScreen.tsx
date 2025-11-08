@@ -30,9 +30,6 @@ import ProductImageWithOverlay from "../../components/common/ProductImage";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// =======================================================================
-// 🛑 TIPAGEM DA ROTA (Mantido o seu código)
-// =======================================================================
 type EstablishmentDetailsRouteParams = {
   storeId: string;
   storeName: string;
@@ -43,7 +40,6 @@ type EstablishmentDetailsRouteParams = {
     nome: string;
     distance: string;
     deliveryTime: string;
-    // ... outras propriedades
   };
 };
 
@@ -52,15 +48,11 @@ type EstablishmentDetailsRouteProp = RouteProp<
   "EstablishmentDetails"
 >;
 
-// =======================================================================
-// 🛑 TIPAGEM DOS PRODUTOS E CATEGORIAS (Mantido o seu código)
-// =======================================================================
 type Product = {
   id: string;
   name: string;
   price: string;
   category: string;
-  // Campos adicionais da API real
   nome_comercial: string;
   classe_terapeutica: string;
   detentor_registro: string;
@@ -81,19 +73,13 @@ type Category = {
   products: Product[];
 };
 
-// =======================================================================
-// 🛑 COMPONENTE PRINCIPAL
-// =======================================================================
 const EstablishmentDetails: React.FC<{ navigation: any }> = ({
   navigation,
 }) => {
-  // 1. CHAME O HOOK useRoute para acessar os parâmetros
   const route = useRoute<EstablishmentDetailsRouteProp>();
 
-  // 2. ACESSE E ARMAZENE OS PARÂMETROS DA LOJA
   const { storeId, storeName, storeDistance, storeDeliveryTime } = route.params;
 
-  // 3. NOVOS ESTADOS PARA PRODUTOS REAIS
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,11 +87,8 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [buyAgainProducts, setBuyAgainProducts] = useState<Product[]>([]);
 
-  // Navegação para ver mais produtos de uma categoria
   const navigateToCategory = (categoryName: string, categoryId: string) => {
     console.log(`Navegando para categoria: ${categoryName}`);
-    // Você pode passar o storeId e o categoryId aqui para a tela de lista de produtos
-    // navigation.navigate('CategoryScreen', { storeId, categoryId, categoryName });
     alert(`Navegando para: ${categoryName}`);
   };
 
@@ -115,7 +98,6 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
     console.log("ID:", product.id);
     console.log("Nome:", product.name);
 
-    // Validação final
     if (!product || !product.id) {
       console.error("❌ ERRO CRÍTICO: Produto ou ID inválido:", product);
       alert("Erro: Produto não encontrado");
@@ -162,7 +144,7 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
 
   // Adicionar ao carrinho
   const addToCart = async (productId: string, productName: string) => {
-    if (isAddingToCart) return; // Evita cliques duplicados
+    if (isAddingToCart) return; 
 
     setIsAddingToCart(true);
     console.log(
@@ -170,14 +152,10 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
     );
 
     try {
-      // Chama o serviço real. A quantidade é 1 por padrão no seu CartService
       await CartService.addItem(productId, 1);
 
-      // 1. Feedback de Sucesso
       Alert.alert("Sucesso", `${productName} adicionado ao carrinho!`);
 
-      // 2. Opcional: Navegar para o carrinho após adicionar (ou apenas mostrar um banner)
-      // navigation.navigate('Cart');
     } catch (e) {
       console.error("❌ Erro ao adicionar ao carrinho:", e);
       Alert.alert(
@@ -189,10 +167,8 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
     }
   };
 
-  // Função de agrupamento dos produtos
   const groupProductsByCategory = (products: ApiProduct[]): Category[] => {
     const grouped = products.reduce((acc, apiProduct) => {
-      // CORREÇÃO: Use os campos reais da API
       console.log("=== DEBUG MAPPING PRODUCT ===");
       console.log("API Product:", apiProduct);
       console.log("idcatalogo_produto:", apiProduct.idcatalogo_produto);
@@ -200,11 +176,10 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
 
       const product: Product = {
         id: apiProduct.idcatalogo_produto.toString(),
-        name: apiProduct.produto.nome_comercial, // ✅ CORRETO
-        price: formatPrice(apiProduct.valor_venda), // ✅ Formatar o preço
+        name: apiProduct.produto.nome_comercial, 
+        price: formatPrice(apiProduct.valor_venda), 
         category: apiProduct.produto.classe_terapeutica || "Outros",
 
-        // Campos adicionais para uso futuro
         nome_comercial: apiProduct.produto.nome_comercial,
         classe_terapeutica: apiProduct.produto.classe_terapeutica,
         detentor_registro: apiProduct.produto.detentor_registro,
@@ -235,20 +210,17 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
       return acc;
     }, {} as Record<string, Category>);
 
-    // Ordena os produtos dentro de cada categoria (disponíveis primeiro)
     Object.values(grouped).forEach((category) => {
       category.products.sort((a, b) => {
-        // Disponíveis primeiro (true vem antes de false)
         if (a.disponibilidade && !b.disponibilidade) return -1;
         if (!a.disponibilidade && b.disponibilidade) return 1;
-        return 0; // Mantém a ordem original se ambos têm mesma disponibilidade
+        return 0; 
       });
     });
 
     return Object.values(grouped);
   };
 
-  // 🛑 4. FUNÇÃO PARA BUSCAR OS DADOS (USANDO storeId)
   const fetchProducts = useCallback(async (id: string) => {
     if (!id) return;
 
@@ -257,14 +229,12 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
     try {
       const apiProducts = await getCatalogProducts2(id);
 
-      // Ordena todos os produtos da API (disponíveis primeiro)
       const sortedApiProducts = [...apiProducts].sort((a, b) => {
         if (a.disponibilidade && !b.disponibilidade) return -1;
         if (!a.disponibilidade && b.disponibilidade) return 1;
         return 0;
       });
 
-      // CORREÇÃO: Crie a categoria "Comprar Novamente" com os dados reais
       const buyAgainProducts = sortedApiProducts
         .slice(0, 3)
         .map((apiProduct) => ({
@@ -311,24 +281,18 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
     return `R$ ${numValue.toFixed(2).replace(".", ",")}`;
   };
 
-  // 🛑 5. CHAMADA DA API NA MONTAGEM DO COMPONENTE
   useEffect(() => {
     fetchProducts(storeId);
-  }, [fetchProducts, storeId]); // Depende do fetchProducts e do storeId
+  }, [fetchProducts, storeId]); 
 
-  // =======================================================================
-  // 🛑 RENDERIZAÇÕES (AGORA USANDO DADOS REAIS)
-  // =======================================================================
 
   const renderStoreInfo = () => (
     <View style={styles.storeInfoSection}>
       <View style={styles.storeAvatar}>
         <MaterialIcons name="store" size={48} color="#9CA3AF" />
       </View>
-      {/* 🛑 ATUALIZADO: Usando storeName da rota */}
       <Text style={styles.storeName}>{storeName}</Text>
       <Text style={styles.storeDetails}>
-        {/* 🛑 ATUALIZADO: Usando storeDistance e storeDeliveryTime da rota */}
         {storeDistance} / {storeDeliveryTime}
       </Text>
     </View>
@@ -419,9 +383,6 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
     </View>
   );
 
-  // =======================================================================
-  // 🛑 RENDER PRINCIPAL
-  // =======================================================================
   return (
     <SafeAreaView style={styles.container}>
       <Header showBackButton showSearchIcon showCartIcon />

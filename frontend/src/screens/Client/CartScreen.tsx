@@ -14,7 +14,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { CartService, CartItem } from "../../services/client/CartService";
+import {
+  CartService,
+  CartItem,
+  CartDetails,
+} from "../../services/client/CartService";
 import Header from "../../components/common/Header";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -23,24 +27,37 @@ type ShoppingCartProps = {
   navigation: any;
 };
 
+const initialCartDetails: CartDetails = {
+  idcarrinho: 0,
+  estabelecimento: { id: 0, name: "" },
+  items: [],
+  subtotal: 0,
+  deliveryFee: 0,
+  total: 0,
+};
+
 const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartDetails, setCartDetails] =
+    useState<CartDetails>(initialCartDetails);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Carregar carrinho quando a tela ganhar foco
+  const cartItems = cartDetails.items;
+  const totalFinal = cartDetails.total;
+  const subtotal = cartDetails.subtotal;
+  const deliveryFee = cartDetails.deliveryFee;
+
   useFocusEffect(
     React.useCallback(() => {
       loadCart();
     }, [])
   );
 
-  // Carregar carrinho da API
   const loadCart = async () => {
     try {
       setIsLoading(true);
-      const items = await CartService.getCart();
-      setCartItems(items);
+      const details = await CartService.getCartDetails();
+      setCartDetails(details);
     } catch (error) {
       console.error("Erro ao carregar carrinho:", error);
       Alert.alert("Erro", "Não foi possível carregar o carrinho");
@@ -49,10 +66,19 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
     }
   };
 
-  // Atualizar quantidade
+  const updateCartData = async () => {
+    try {
+      const details = await CartService.getCartDetails();
+      setCartDetails(details);
+      return details;
+    } catch (error) {
+      console.error("Erro ao buscar dados atualizados do carrinho:", error);
+      return null;
+    }
+  };
+
   const updateQuantity = async (id: string, newQuantity: number) => {
     if (newQuantity < 1) {
-      // Remover item se quantidade for 0
       removeItem(id);
       return;
     }
@@ -61,52 +87,57 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
     if (!itemToUpdate) return;
     const oldQuantity = itemToUpdate.quantity;
 
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
+    setCartDetails((prevDetails) => ({
+      ...prevDetails,
+      items: prevDetails.items.map((item) =>
         item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+      ),
+    }));
 
     try {
       setIsUpdating(true);
       await CartService.updateQuantity(id, newQuantity);
-      await updateCartData(); // Recarrega o carrinho para ter os dados atualizados
+      await updateCartData();
     } catch (error) {
       console.error("Erro ao atualizar quantidade:", error);
       Alert.alert("Erro", "Não foi possível atualizar a quantidade");
 
-      setCartItems((prevItems) =>
-        prevItems.map((item) =>
+      setCartDetails((prevDetails) => ({
+        ...prevDetails,
+        items: prevDetails.items.map((item) =>
           item.id === id ? { ...item, quantity: oldQuantity } : item
-        )
-      );
+        ),
+      }));
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Remover item
   const removeItem = async (id: string) => {
     const itemToRemove = cartItems.find((item) => item.id === id);
     if (!itemToRemove) return;
-    const remainingItems = cartItems.filter((item) => item.id !== id);
 
-    setCartItems(remainingItems);
+    setCartDetails((prevDetails) => ({
+      ...prevDetails,
+      items: prevDetails.items.filter((item) => item.id !== id),
+    }));
 
     try {
       setIsUpdating(true);
       await CartService.removeItem(id);
-      await updateCartData(); // Recarrega o carrinho
+      await updateCartData();
     } catch (error) {
       console.error("Erro ao remover item:", error);
       Alert.alert("Erro", "Não foi possível remover o item");
-      setCartItems((prevItems) => [...prevItems, itemToRemove]);
+      setCartDetails((prevDetails) => ({
+        ...prevDetails,
+        items: [...prevDetails.items, itemToRemove],
+      }));
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Limpar carrinho
   const clearCart = async () => {
     Alert.alert(
       "Limpar Carrinho?",
@@ -122,8 +153,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
             try {
               setIsUpdating(true);
               await CartService.clearCart();
-              // 💡 Atualiza o estado local imediatamente, sem refetch
-              setCartItems([]);
+              setCartDetails(initialCartDetails);
               Alert.alert("Sucesso", "O carrinho foi esvaziado.");
             } catch (error) {
               console.error("Erro ao limpar carrinho:", error);
@@ -137,27 +167,10 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
     );
   };
 
-  // Calcular total
-  const total = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const updateCartData = async () => {
-    try {
-      const items = await CartService.getCart();
-      setCartItems(items);
-      // O total será recalculado automaticamente
-    } catch (error) {
-      console.error("Erro ao buscar dados atualizados do carrinho:", error);
-      // Não mostramos um alerta grande, pois já estamos em uma operação interativa.
-    }
-  };
-
-  // Continuar comprando
   const continueShopping = () => {
     navigation.goBack();
   };
+
   const ClearCartComponent = () => {
     if (cartItems.length === 0) {
       return null;
@@ -169,15 +182,40 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
-  // Fechar pedido
-  const checkout = () => {
-    if (cartItems.length === 0) {
+
+  const checkout = async () => {
+    if (cartItems.length === 0 || isUpdating) {
       Alert.alert("Carrinho vazio", "Seu carrinho está vazio");
       return;
     }
-    
-    console.log('Fechando pedido...', cartItems);
-    navigation.navigate('ConfirmAddress', { cartItems, total });
+
+    try {
+      setIsUpdating(true);
+
+      const updatedDetails = await CartService.getCartDetails();
+
+      if (updatedDetails) {
+        console.log("💰 Dados finais para checkout (com taxa):", {
+          subtotal: updatedDetails.subtotal,
+          deliveryFee: updatedDetails.deliveryFee,
+          total: updatedDetails.total,
+        });
+
+        navigation.navigate("ConfirmAddress", {
+          cartItems: updatedDetails.items,
+          total: updatedDetails.total,
+          cartDetails: updatedDetails,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao preparar checkout:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível finalizar o pedido. Tente novamente."
+      );
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   // Formatar preço
@@ -249,6 +287,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
     </View>
   );
 
+  // 💡 renderFooter ATUALIZADO
   const renderFooter = () => {
     if (cartItems.length === 0) {
       return null;
@@ -256,9 +295,36 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
 
     return (
       <View style={styles.footer}>
+        {/* 💡 Subtotal */}
         <View style={styles.totalSection}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>{formatPrice(total)}</Text>
+          <Text style={styles.totalLabel}>Subtotal</Text>
+          <Text style={styles.totalValue}>{formatPrice(subtotal)}</Text>
+        </View>
+
+        {/* 💡 Taxa de Entrega */}
+        <View style={styles.totalSection}>
+          <Text style={styles.totalLabel}>Taxa de Entrega</Text>
+          <Text
+            style={[styles.totalValue, deliveryFee === 0 && { color: "green" }]}
+          >
+            {deliveryFee === 0 ? "Grátis" : formatPrice(deliveryFee)}
+          </Text>
+        </View>
+
+        {/* 💡 Total Final */}
+        <View
+          style={[
+            styles.totalSection,
+            {
+              marginTop: 10,
+              borderTopWidth: 1,
+              borderTopColor: "#E5E7EB",
+              paddingTop: 10,
+            },
+          ]}
+        >
+          <Text style={styles.totalLabel}>Total do Pedido</Text>
+          <Text style={styles.totalValueFinal}>{formatPrice(totalFinal)}</Text>
         </View>
 
         <View style={styles.footerButtons}>
@@ -324,30 +390,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  iconButton: {
-    padding: 4,
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000000",
-  },
-  headerSpacer: {
-    width: 40,
-  },
+  // ... (Estilos não alterados)
   scrollView: {
     flex: 1,
   },
@@ -468,13 +511,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 5,
   },
   totalLabel: {
-    fontSize: 18,
-    color: "#000000",
+    fontSize: 16,
+    color: "#6B7280",
   },
   totalValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000000",
+  },
+  totalValueFinal: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#000000",
@@ -482,6 +530,7 @@ const styles = StyleSheet.create({
   footerButtons: {
     flexDirection: "row",
     gap: 12,
+    marginTop: 16,
   },
   continueButton: {
     flex: 1,

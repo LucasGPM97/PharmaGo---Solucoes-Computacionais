@@ -36,8 +36,8 @@ class ProdutoService {
   }
 
   public async getProdutoById(idproduto: number): Promise<Produto | null> {
-    console.log("Buscando produto no banco com ID:", idproduto); // Verifique se o valor do ID está correto
-    const produto = await Produto.findByPk(idproduto); // Faz a busca pelo ID
+    console.log("Buscando produto no banco com ID:", idproduto); 
+    const produto = await Produto.findByPk(idproduto); 
     return produto;
   }
 
@@ -90,14 +90,12 @@ class ProdutoService {
     }
 
     const lowerCaseClasse = classe.toLowerCase();
-    // Busca todos os produtos onde a coluna 'classe_terapeutica' é igual ao valor fornecido
     const produtos = await Produto.findAll({
       where: {
-        // ✅ CORREÇÃO: Usamos o literal para representar a coluna processada
         [Op.and]: [
           sequelize.where(
-            literal("LOWER(classe_terapeutica)"), // Coluna/Expressão SQL
-            lowerCaseClasse // Valor de comparação
+            literal("LOWER(classe_terapeutica)"), 
+            lowerCaseClasse 
           ),
         ],
       },

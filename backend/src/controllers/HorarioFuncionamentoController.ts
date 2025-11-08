@@ -10,10 +10,6 @@ export interface HorarioUpdate {
 }
 
 class HorarioFuncionamentoController {
-  /**
-   * GET /api/estabelecimentos/:idestabelecimento/horarios
-   * Busca todos os horários de funcionamento para um estabelecimento.
-   */
   public async findAllByEstabelecimento(
     req: Request,
     res: Response
@@ -38,10 +34,6 @@ class HorarioFuncionamentoController {
     }
   }
 
-  /**
-   * POST /api/horarios
-   * Cria um novo registro de horário.
-   */
   public async create(req: Request, res: Response): Promise<Response> {
     try {
       const horario = await HorarioFuncionamentoService.createHorario(req.body);
@@ -51,10 +43,6 @@ class HorarioFuncionamentoController {
     }
   }
 
-  /**
-   * PUT /api/horarios/:idhorario
-   * Atualiza um registro de horário específico.
-   */
   public async update(req: Request, res: Response): Promise<Response> {
     try {
       const idhorario = Number(req.params.idhorario);
@@ -78,10 +66,6 @@ class HorarioFuncionamentoController {
     }
   }
 
-  /**
-   * DELETE /api/horarios/:idhorario
-   * Deleta um registro de horário específico.
-   */
   public async delete(req: Request, res: Response): Promise<Response> {
     try {
       const deletedRows = await HorarioFuncionamentoService.deleteHorario(
@@ -96,16 +80,13 @@ class HorarioFuncionamentoController {
     }
   }
 
-  /**
-   * Atualiza o array completo de horários de funcionamento de um estabelecimento.
-   */
   public async updateBulkByEstabelecimento(
     req: Request,
     res: Response
   ): Promise<Response> {
     try {
       const idestabelecimento = parseInt(req.params.idestabelecimento, 10);
-      const updates: HorarioUpdate[] = req.body; // Espera um array de objetos de horário
+      const updates: HorarioUpdate[] = req.body;
 
       if (isNaN(idestabelecimento) || !Array.isArray(updates)) {
         return res
@@ -117,7 +98,6 @@ class HorarioFuncionamentoController {
         `Recebendo ${updates.length} horários para o Estabelecimento ID: ${idestabelecimento}`
       );
 
-      // Chama o Service para processar a atualização em massa
       await HorarioFuncionamentoService.updateBulk(idestabelecimento, updates);
 
       return res
@@ -125,7 +105,6 @@ class HorarioFuncionamentoController {
         .json({ message: "Horários atualizados com sucesso." });
     } catch (error: any) {
       console.error("Erro no Controller ao atualizar horários:", error);
-      // Se for erro de validação do Sequelize, pode ser 400, senão 500
       const status = error.name === "SequelizeValidationError" ? 400 : 500;
       return res.status(status).json({
         error: "Falha ao salvar horários.",
