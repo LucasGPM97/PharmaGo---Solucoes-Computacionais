@@ -1,0 +1,38 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Expo / React Native
+.expo/
+.expo-shared/
+web-build/
+dist/
+
+# Native builds
+/ios/
+/android/
+/.kotlin/
+
+# Metro
+.metro-health-check*
+
+# Environment
+.env*
+*.pem
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Debug / logs
+*.log
+*.orig.*
+
+# macOS
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
