@@ -15,20 +15,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-
-// Serviço atualizado
 import {
   getClienteById,
   updateCliente,
 } from "../../services/client/ClientService";
-
-// Componentes personalizados
 import Header from "../../components/common/Header";
 import Footer from "../../components/common/Footer";
 import MaskedInput from "../../components/common/MaskedInput";
 import DateInput from "../../components/common/DateInput";
 
-// Tipos
 type Cliente = {
   idcliente: number;
   email: string;
@@ -62,7 +57,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Estados para os campos do formulário
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [numeroContato, setNumeroContato] = useState("");
@@ -70,7 +64,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
   const [dataNascimento, setDataNascimento] = useState("");
   const [imagemPerfilUrl, setImagemPerfilUrl] = useState("");
 
-  // Carregar dados do cliente - COM DEBUG
   const loadClienteData = async () => {
     try {
       setIsLoading(true);
@@ -81,7 +74,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
 
       setCliente(clienteData);
 
-      // Preencher os campos do formulário com verificação
       setNome(clienteData.nome || "");
       setEmail(clienteData.email || "");
       setNumeroContato(clienteData.numero_contato || "");
@@ -106,7 +98,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
     }
   };
 
-  // Validações corrigidas e simplificadas
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -114,14 +105,12 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
     console.log("Nome para validação:", nome, "Comprimento:", nome.length);
     console.log("Email para validação:", email, "Comprimento:", email.length);
 
-    // Validação do NOME - mais simples
     if (!nome || nome.trim().length === 0) {
       newErrors.nome = "Nome é obrigatório";
     } else if (nome.trim().length < 2) {
       newErrors.nome = "Nome deve ter pelo menos 2 caracteres";
     }
 
-    // Validação do EMAIL - mais simples
     if (!email || email.trim().length === 0) {
       newErrors.email = "E-mail é obrigatório";
     } else {
@@ -131,7 +120,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
       }
     }
 
-    // Validação do TELEFONE
     if (!numeroContato || numeroContato.trim().length === 0) {
       newErrors.numeroContato = "Telefone é obrigatório";
     } else {
@@ -141,7 +129,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
       }
     }
 
-    // Validação da DATA DE NASCIMENTO
     if (!dataNascimento || dataNascimento.trim().length === 0) {
       newErrors.dataNascimento = "Data de nascimento é obrigatória";
     }
@@ -151,7 +138,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Verificar se houve mudanças
   const hasChanges = (): boolean => {
     if (!cliente) return false;
 
@@ -166,7 +152,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
     return changed;
   };
 
-  // Salvar alterações
   const saveChanges = async () => {
     console.log("💾 Iniciando salvamento...");
 
@@ -185,7 +170,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
 
       const updateData: UpdateClienteData = {};
 
-      // Só inclui os campos que foram alterados
       if (nome !== cliente?.nome) updateData.nome = nome;
       if (email !== cliente?.email) updateData.email = email;
       if (numeroContato !== cliente?.numero_contato)
@@ -219,7 +203,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
     }
   };
 
-  // Resetar formulário
   const resetForm = () => {
     if (cliente) {
       setNome(cliente.nome || "");
@@ -236,7 +219,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
     loadClienteData();
   }, []);
 
-  // Voltar com confirmação se houver mudanças
   const goBack = () => {
     if (hasChanges()) {
       Alert.alert(
@@ -291,8 +273,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
         >
           <View style={styles.formSection}>
             <Text style={styles.sectionTitle}>Informações Pessoais</Text>
-
-            {/* Nome */}
             <View>
               <Text style={styles.inputLabel}>Nome Completo *</Text>
               <TextInput
@@ -306,8 +286,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
                 <Text style={styles.errorText}>{errors.nome}</Text>
               )}
             </View>
-
-            {/* Email */}
             <View>
               <Text style={styles.inputLabel}>E-mail *</Text>
               <TextInput
@@ -323,8 +301,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
                 <Text style={styles.errorText}>{errors.email}</Text>
               )}
             </View>
-
-            {/* Telefone */}
             <MaskedInput
               label="Telefone *"
               value={numeroContato}
@@ -335,8 +311,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
               maskType="phone"
               keyboardType="phone-pad"
             />
-
-            {/* CPF */}
             <MaskedInput
               label="CPF"
               value={documentoIdentificacao}
@@ -348,8 +322,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
               keyboardType="numeric"
               editable={false}
             />
-
-            {/* Data de Nascimento */}
             <DateInput
               label="Data de Nascimento"
               value={dataNascimento}
@@ -358,7 +330,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
               editable={false}
             />
           </View>
-
           <View style={styles.actionsSection}>
             <TouchableOpacity
               style={[
@@ -395,8 +366,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
               </Text>
             </TouchableOpacity>
           </View>
-
-          {/* Espaço para o footer não sobrepor o conteúdo */}
           <View style={styles.footerSpacer} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -406,7 +375,6 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
   );
 };
 
-// Adicionando estilos para TextInput básico
 const styles = StyleSheet.create({
   container: {
     flex: 1,
