@@ -10,7 +10,7 @@ export interface Estabelecimento {
   registro_anvisa: string;
   responsavel_tecnico: string;
   telefone_contato: string;
-  conta_bancaria: string;
+  conta_bancaria: number;
   raio_cobertura: number;
   valor_minimo_entrega: number;
   taxa_entrega: number;

@@ -3,7 +3,6 @@ import {
   View,
   TouchableOpacity,
   Text,
-  Platform,
   StyleSheet,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -15,6 +14,7 @@ interface DateInputProps {
   onChange?: (value: string) => void;
   error?: string;
   iconName?: keyof typeof Ionicons.glyphMap;
+  editable?: boolean;
 }
 
 const DateInput: React.FC<DateInputProps> = ({
@@ -23,6 +23,7 @@ const DateInput: React.FC<DateInputProps> = ({
   onChange,
   error,
   iconName = "calendar-outline",
+  editable = true,
 }) => {
   const getInitialDate = () => {
     if (!value) return new Date();
@@ -54,6 +55,7 @@ const DateInput: React.FC<DateInputProps> = ({
   };
 
   const showDatePicker = () => {
+    if (!editable) return;
     setShowPicker(true);
   };
 
@@ -74,22 +76,29 @@ const DateInput: React.FC<DateInputProps> = ({
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
 
-      <TouchableOpacity onPress={showDatePicker} activeOpacity={0.7}>
+      <TouchableOpacity 
+        onPress={showDatePicker} 
+        activeOpacity={editable ? 0.7 : 1}
+        disabled={!editable}
+      >
         <View
           style={[
             styles.inputWrapper,
-            {
-              /* error && styles.inputError*/
-            },
+            error && styles.inputError,
+            !editable && styles.inputDisabled,
           ]}
         >
           <Ionicons
             name={iconName}
             size={20}
-            color="#666"
+            color={editable ? "#666" : "#999"}
             style={styles.icon}
           />
-          <Text style={styles.dateText}>
+          <Text style={[
+            styles.dateText,
+            !value && styles.placeholderText,
+            !editable && styles.textDisabled,
+          ]}>
             {value
               ? formatDisplayDate(value)
               : "Selecione a data de nascimento"}
@@ -97,7 +106,7 @@ const DateInput: React.FC<DateInputProps> = ({
         </View>
       </TouchableOpacity>
 
-      {showPicker && (
+      {showPicker && editable && (
         <DateTimePicker
           value={date}
           mode="date"
@@ -109,7 +118,7 @@ const DateInput: React.FC<DateInputProps> = ({
         />
       )}
 
-      {/*{error && <Text style={styles.errorText}>{error}</Text>}*/}
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 };
@@ -134,18 +143,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
   },
+  inputError: {
+    borderColor: "#EF4444",
+    backgroundColor: "#FEF2F2",
+  },
+  inputDisabled: {
+    backgroundColor: "#f8f8f8",
+    borderColor: "#e0e0e0",
+    opacity: 0.7,
+  },
   dateText: {
     fontSize: 16,
     color: "#333",
     flex: 1,
   },
-  inputError: {
-    borderColor: "red",
+  placeholderText: {
+    color: "#999",
+  },
+  textDisabled: {
+    color: "#888",
   },
   errorText: {
-    color: "red",
+    color: "#EF4444",
     fontSize: 12,
     marginTop: 5,
+    marginLeft: 4,
   },
   icon: {
     marginRight: 8,

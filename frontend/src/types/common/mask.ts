@@ -1,4 +1,3 @@
-
 export type MaskType =
   | "cpf"
   | "phone"
@@ -9,7 +8,8 @@ export type MaskType =
   | "creditCard"
   | "cardExpiry"
   | "cvv"
-  | "time";
+  | "time"
+  | "anvisa";
 
 /**
  * Aplica a máscara especificada ao valor de entrada.
@@ -71,6 +71,16 @@ export const applyMask = (value: string, maskType: MaskType): string => {
   }
 
   // --- MÁSCARAS DE CADASTRO/ENDEREÇO/FINANCEIRO ---
+
+  if (maskType === "anvisa") {
+    // Registro ANVISA: 4.04128-2 (formato: X.XXXXX-X)
+    cleanedValue = cleanedValue.substring(0, 7); // 1 + 5 + 1 = 7 dígitos totais
+    let masked = "";
+    if (cleanedValue.length > 0) masked += cleanedValue.substring(0, 1);
+    if (cleanedValue.length > 1) masked += "." + cleanedValue.substring(1, 6);
+    if (cleanedValue.length > 6) masked += "-" + cleanedValue.substring(6, 7);
+    return masked;
+  }
 
   if (maskType === "cnpj") {
     // CNPJ: 99.999.999/9999-99

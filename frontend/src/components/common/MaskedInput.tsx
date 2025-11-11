@@ -36,6 +36,7 @@ const MASK_RAW_LENGTHS: Record<MaskType, number> = {
   cvv: 3,
   date: 8,
   time: 4,
+  anvisa: 8,
 };
 
 const MaskedInput: React.FC<MaskedInputProps> = ({
@@ -70,7 +71,8 @@ const MaskedInput: React.FC<MaskedInputProps> = ({
       type === "cardExpiry" ||
       type === "cvv" ||
       type === "date" ||
-      type === "time"
+      type === "time" ||
+      type === "anvisa"
     ) {
       return "numeric";
     }

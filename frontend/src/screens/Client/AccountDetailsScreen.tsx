@@ -351,10 +351,11 @@ const AccountManagement: React.FC<AccountManagementProps> = ({
 
             {/* Data de Nascimento */}
             <DateInput
-              label="Data de Nascimento *"
+              label="Data de Nascimento"
               value={dataNascimento}
               onChange={handleDateChange}
               error={errors.dataNascimento}
+              editable={false}
             />
           </View>
 
