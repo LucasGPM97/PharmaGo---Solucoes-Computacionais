@@ -109,12 +109,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ navigation, route }) => {
     if (!order?.estabelecimento?.telefone_contato) {
       Alert.alert("Informação", "Telefone do estabelecimento não disponível.");
 
-      
       return;
     }
 
     const phoneNumber = order.estabelecimento.telefone_contato;
-      console.log(order?.estabelecimento?.telefone_contato)
+    console.log(order?.estabelecimento?.telefone_contato);
 
     // Remove caracteres não numéricos
     const cleanPhone = phoneNumber.replace(/\D/g, "");
@@ -711,10 +710,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ navigation, route }) => {
           </View>
         )}
       </ScrollView>
-
-      <View style={styles.fixedBottom}>
-        <Footer />
-      </View>
+      <Footer />
     </SafeAreaView>
   );
 };
@@ -1113,7 +1109,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: 12, 
+    gap: 12,
   },
   productImageContainer: {
     width: 80,

@@ -6,20 +6,20 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  StatusBar,
   Dimensions,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import {  useFocusEffect } from "@react-navigation/native";
 import {
   CartService,
   CartItem,
   CartDetails,
 } from "../../services/client/CartService";
 import Header from "../../components/common/Header";
+import ProductImageWithOverlay from "../../components/common/ProductImage";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -225,8 +225,20 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ navigation }) => {
 
   const renderCartItem = (item: CartItem) => (
     <View key={item.id} style={styles.cartItem}>
-      <View style={styles.itemImage}>
-        <MaterialIcons name="image" size={36} color="#9CA3AF" />
+       <View style={styles.itemImage}>
+        <ProductImageWithOverlay
+          product={{
+            id: item.id,
+            nome_comercial: item.name,
+            apresentacao: item.apresentacao,
+            substancia_ativa: item.substancia_ativa,
+            tarja: item.tarja,
+            tipo_produto: item.tipo_produto,
+            disponibilidade: item.disponibilidade,
+          }}
+          style={styles.productImageStyle}
+          imageStyle={styles.productImageInner}
+        />
       </View>
 
       <View style={styles.itemInfo}>
@@ -586,6 +598,15 @@ const styles = StyleSheet.create({
   removeButton: {
     padding: 4,
   },
+  productImageStyle: {
+  width: "100%",
+  height: "100%",
+  backgroundColor: "transparent",
+},
+productImageInner: {
+  width: "100%",
+  height: "100%",
+},
 });
 
 export default ShoppingCart;

@@ -10,6 +10,10 @@ export interface CartItem {
   imageUrl?: string;
   details?: string;
   estabelecimente_id?: number;
+  apresentacao: string;
+  tarja: string;
+  tipo_produto: string;
+  disponibilidade: boolean;
 }
 
 export interface EstabelecimentoDetails {
@@ -22,12 +26,11 @@ export interface CartDetails {
   estabelecimento: EstabelecimentoDetails;
   items: CartItem[];
   subtotal: number;
-  deliveryFee: number; // Agora virá do cálculo do backend/frontend
-  total: number; // O total final que inclui o subtotal + deliveryFee
+  deliveryFee: number;
+  total: number;
 }
 
 export const CartService = {
-  // Funções de getCart, addItem, updateQuantity, removeItem, clearCart (não alteradas)
   
   async getCart(): Promise<CartItem[]> {
     try {
@@ -54,6 +57,10 @@ export const CartService = {
               price: parseFloat(item.catalogo_produto.valor_venda),
               quantity: item.quantidade,
               details: item.catalogo_produto.produto.apresentacao,
+              apresentacao: item.catalogo_produto.produto.apresentacao || "Não informado",
+              tarja: item.catalogo_produto.produto.tarja || "Sem tarja",
+              tipo_produto: item.catalogo_produto.produto.tipo_produto || "Medicamento",
+              disponibilidade: item.catalogo_produto.produto.disponibilidade !== false,
             });
           }
         });
@@ -233,6 +240,10 @@ async getCartDetails(): Promise<CartDetails> {
               price: price,
               quantity: quantity,
               details: item.catalogo_produto.produto.apresentacao,
+              apresentacao: item.catalogo_produto.produto.apresentacao || "Não informado",
+              tarja: item.catalogo_produto.produto.tarja || "Sem tarja",
+              tipo_produto: item.catalogo_produto.produto.tipo_produto || "Medicamento",
+              disponibilidade: item.catalogo_produto.produto.disponibilidade !== false,
             });
           }
         });

@@ -10,21 +10,26 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import {
-  EstablishmentStackParamList,
-} from "../../navigation/EstablishmentNavigator";
+import { EstablishmentStackParamList } from "../../navigation/EstablishmentNavigator";
 import {
   EstablishmentPedidoService,
   Order,
 } from "../../services/establishment/PedidoService";
 import Header from "../../components/common/Header";
 
-type OrderStatus = "pending" | "accepted" | "in_separation" | "in_route" | "delivered" | "cancelled";
+type OrderStatus =
+  | "pending"
+  | "accepted"
+  | "in_separation"
+  | "in_route"
+  | "delivered"
+  | "cancelled";
 type PrescriptionStatus = "pending" | "validated" | "rejected";
 
 interface Prescription {
@@ -39,7 +44,8 @@ interface RouteParams {
 }
 
 const EstablishmentOrderDetailsScreen: React.FC = () => {
-  const navigation = useNavigation<StackNavigationProp<EstablishmentStackParamList>>();
+  const navigation =
+    useNavigation<StackNavigationProp<EstablishmentStackParamList>>();
   const route = useRoute();
   const { orderId } = route.params as RouteParams;
 
@@ -50,7 +56,8 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     summary: false,
     prescriptions: false,
   });
-  const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<Prescription | null>(null);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [orderData, setOrderData] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,72 +77,81 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     warning: "#FF9500",
   };
 
-  const fetchOrderDetails = useCallback(async (isManualRefresh = false) => {
-    if (isManualRefresh) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-
-    try {
-      console.log("🔄 Buscando detalhes do pedido:", orderId);
-      
-      const orders = await EstablishmentPedidoService.getOrdersByEstablishment();
-      const order = orders.find(o => o.idpedido.toString() === orderId);
-      
-      if (order) {
-        console.log("✅ Pedido encontrado:", order);
-        setOrderData(order);
-        
-        // Mapeia o status da API para o status interno
-        const statusMap: { [key: string]: OrderStatus } = {
-          "Aguardando Pagamento": "pending",
-          "Em Separação": "in_separation",
-          "Em Rota": "in_route",
-          "Entregue": "delivered",
-          "Cancelado": "cancelled",
-        };
-        
-        setOrderStatus(statusMap[order.status] || "pending");
+  const fetchOrderDetails = useCallback(
+    async (isManualRefresh = false) => {
+      if (isManualRefresh) {
+        setIsRefreshing(true);
       } else {
-        console.error("❌ Pedido não encontrado");
+        setIsLoading(true);
       }
-    } catch (error) {
-      console.error("❌ Erro ao buscar detalhes do pedido:", error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [orderId]);
 
-  const handleUpdateOrderStatus = async (newStatus: OrderStatus, statusText: string) => {
+      try {
+        console.log("🔄 Buscando detalhes do pedido:", orderId);
+
+        const orders =
+          await EstablishmentPedidoService.getOrdersByEstablishment();
+        const order = orders.find((o) => o.idpedido.toString() === orderId);
+
+        if (order) {
+          console.log("✅ Pedido encontrado:", order);
+          setOrderData(order);
+
+          // Mapeia o status da API para o status interno
+          const statusMap: { [key: string]: OrderStatus } = {
+            "Aguardando Pagamento": "pending",
+            "Em Separação": "in_separation",
+            "Em Rota": "in_route",
+            Entregue: "delivered",
+            Cancelado: "cancelled",
+          };
+
+          setOrderStatus(statusMap[order.status] || "pending");
+        } else {
+          console.error("❌ Pedido não encontrado");
+        }
+      } catch (error) {
+        console.error("❌ Erro ao buscar detalhes do pedido:", error);
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [orderId]
+  );
+
+  const handleUpdateOrderStatus = async (
+    newStatus: OrderStatus,
+    statusText: string
+  ) => {
     try {
       setIsUpdatingStatus(true);
-      
+
       console.log(`🔄 Atualizando pedido ${orderId} para: ${statusText}`);
-      
+
       const statusMap: { [key: OrderStatus]: string } = {
-        "pending": "Aguardando Pagamento",
-        "accepted": "Em Separação",
-        "in_separation": "Em Separação",
-        "in_route": "Em Rota",
-        "delivered": "Entregue",
-        "cancelled": "Cancelado",
+        pending: "Aguardando Pagamento",
+        accepted: "Em Separação",
+        in_separation: "Em Separação",
+        in_route: "Em Rota",
+        delivered: "Entregue",
+        cancelled: "Cancelado",
       };
 
       const apiStatus = statusMap[newStatus];
-      
+
       await EstablishmentPedidoService.updateOrderStatus(orderId, apiStatus);
-      
+
       setOrderStatus(newStatus);
-      
+
       await fetchOrderDetails();
-      
+
       Alert.alert("Sucesso", `Pedido ${statusText.toLowerCase()} com sucesso!`);
-      
     } catch (error: any) {
       console.error("❌ Erro ao atualizar status:", error);
-      Alert.alert("Erro", "Não foi possível atualizar o status do pedido. Tente novamente.");
+      Alert.alert(
+        "Erro",
+        "Não foi possível atualizar o status do pedido. Tente novamente."
+      );
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -147,7 +163,7 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
       `Tem certeza que deseja ${action.toLowerCase()} este pedido?`,
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Confirmar", onPress: onConfirm }
+        { text: "Confirmar", onPress: onConfirm },
       ]
     );
   };
@@ -184,16 +200,51 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
     setSelectedPrescription(null);
   };
 
+  const handleCallClient = async () => {
+    if (!orderData?.cliente.numero_contato) {
+      Alert.alert("Informação", "Telefone do estabelecimento não disponível.");
+
+      return;
+    }
+   const phoneNumber = orderData.cliente.numero_contato;
+       console.log(orderData.cliente.numero_contato);
+   
+       // Remove caracteres não numéricos
+       const cleanPhone = phoneNumber.replace(/\D/g, "");
+   
+       // Verifica se o número tem o código do país (55 para Brasil)
+       const formattedPhone = cleanPhone.startsWith("55")
+         ? cleanPhone
+         : `55${cleanPhone}`;
+   
+       const phoneUrl = `tel:${formattedPhone}`;
+   
+       try {
+         const supported = await Linking.canOpenURL(phoneUrl);
+   
+         if (supported) {
+           await Linking.openURL(phoneUrl);
+         } else {
+           Alert.alert("Erro", "Não é possível fazer ligações neste dispositivo.");
+         }
+       } catch (error) {
+         console.error("Erro ao abrir app de ligação:", error);
+         Alert.alert("Erro", "Não foi possível completar a ligação.");
+       }
+     };
+
   const formatPrice = (price: string | number): string => {
-    const value = typeof price === 'string' ? parseFloat(price.replace(',', '.')) : price;
-    return `R$ ${value.toFixed(2).replace('.', ',')}`;
+    const value =
+      typeof price === "string" ? parseFloat(price.replace(",", ".")) : price;
+    return `R$ ${value.toFixed(2).replace(".", ",")}`;
   };
 
   const calculateSubtotal = (): number => {
     if (!orderData?.pedido_itens) return 0;
-    
+
     return orderData.pedido_itens.reduce((sum, item) => {
-      const valorUnitario = parseFloat(String(item.valor_unitario_venda).replace(',', '.')) || 0;
+      const valorUnitario =
+        parseFloat(String(item.valor_unitario_venda).replace(",", ".")) || 0;
       const quantidade = parseInt(String(item.quantidade)) || 0;
       return sum + valorUnitario * quantidade;
     }, 0);
@@ -201,9 +252,10 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
 
   const calculateDeliveryFee = (): number => {
     if (!orderData?.valor_total) return 0;
-    
+
     const subtotal = calculateSubtotal();
-    const total = parseFloat(String(orderData.valor_total).replace(',', '.')) || 0;
+    const total =
+      parseFloat(String(orderData.valor_total).replace(",", ".")) || 0;
     return Math.max(0, total - subtotal);
   };
 
@@ -296,7 +348,13 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.centered, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.container,
+          styles.centered,
+          { backgroundColor: colors.background },
+        ]}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={[styles.loadingText, { color: colors.text }]}>
           Carregando detalhes do pedido...
@@ -307,12 +365,18 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
 
   if (!orderData) {
     return (
-      <View style={[styles.container, styles.centered, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.container,
+          styles.centered,
+          { backgroundColor: colors.background },
+        ]}
+      >
         <MaterialIcons name="error-outline" size={48} color={colors.danger} />
         <Text style={[styles.errorText, { color: colors.text }]}>
           Pedido não encontrado
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.primary }]}
           onPress={() => navigation.goBack()}
         >
@@ -324,7 +388,8 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
 
   const subtotal = calculateSubtotal();
   const deliveryFee = calculateDeliveryFee();
-  const total = parseFloat(String(orderData.valor_total).replace(',', '.')) || 0;
+  const total =
+    parseFloat(String(orderData.valor_total).replace(",", ".")) || 0;
 
   const mockPrescriptions: Prescription[] = [
     {
@@ -348,8 +413,8 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
       <Header title={`Pedido N° ${orderData.idpedido}`} showBackButton />
 
       {/* Main Content */}
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -362,15 +427,17 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
       >
         <View style={styles.mainContent}>
           {/* Status do Pedido */}
-          <View style={[styles.statusCard, { backgroundColor: colors.grayLight }]}>
+          <View
+            style={[styles.statusCard, { backgroundColor: colors.grayLight }]}
+          >
             <Text style={[styles.statusTitle, { color: colors.text }]}>
               Status do Pedido
             </Text>
             <View style={styles.statusBadge}>
-              <MaterialIcons 
-                name="receipt-long" 
-                size={20} 
-                color={colors.primary} 
+              <MaterialIcons
+                name="receipt-long"
+                size={20}
+                color={colors.primary}
               />
               <Text style={[styles.statusText, { color: colors.text }]}>
                 {orderData.status}
@@ -402,7 +469,8 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
               <View key={item.idpedido_item} style={styles.productItem}>
                 <View style={styles.productInfo}>
                   <Text style={[styles.productName, { color: colors.text }]}>
-                    {item.catalogo_produto?.produto?.nome_comercial || "Produto sem nome"}
+                    {item.catalogo_produto?.produto?.nome_comercial ||
+                      "Produto sem nome"}
                   </Text>
                   <Text
                     style={[
@@ -410,8 +478,8 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
                       { color: colors.textSecondary },
                     ]}
                   >
-                    Quantidade: {item.catalogo_produto.produto.apresentacao}
-                  </Text> 
+                    {item.catalogo_produto.produto.apresentacao}
+                  </Text>
                   <Text
                     style={[
                       styles.productQuantity,
@@ -436,13 +504,15 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
           >
             <View style={styles.addressContent}>
               <Text style={[styles.addressText, { color: colors.text }]}>
-                {orderData.endereco_cliente?.logradouro} {orderData.endereco_cliente?.numero}
+                {orderData.endereco_cliente?.logradouro}{" "}
+                {orderData.endereco_cliente?.numero}
               </Text>
               <Text style={[styles.addressText, { color: colors.text }]}>
                 {orderData.endereco_cliente?.bairro}
               </Text>
               <Text style={[styles.addressText, { color: colors.text }]}>
-                {orderData.endereco_cliente?.cidade} - {orderData.endereco_cliente?.estado}
+                {orderData.endereco_cliente?.cidade} -{" "}
+                {orderData.endereco_cliente?.estado}
               </Text>
               <Text style={[styles.addressText, { color: colors.text }]}>
                 CEP: {orderData.endereco_cliente?.cep}
@@ -529,7 +599,11 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
                   styles.rejectButton,
                   { backgroundColor: colors.danger },
                 ]}
-                onPress={() => confirmAction("recusar", () => handleUpdateOrderStatus("cancelled", "Cancelado"))}
+                onPress={() =>
+                  confirmAction("recusar", () =>
+                    handleUpdateOrderStatus("cancelled", "Cancelado")
+                  )
+                }
                 disabled={isUpdatingStatus}
               >
                 {isUpdatingStatus ? (
@@ -544,7 +618,11 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
                   styles.acceptButton,
                   { backgroundColor: colors.success },
                 ]}
-                onPress={() => confirmAction("aceitar", () => handleUpdateOrderStatus("in_separation", "Em Separação"))}
+                onPress={() =>
+                  confirmAction("aceitar", () =>
+                    handleUpdateOrderStatus("in_separation", "Em Separação")
+                  )
+                }
                 disabled={isUpdatingStatus}
               >
                 {isUpdatingStatus ? (
@@ -570,7 +648,9 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
                 {isUpdatingStatus ? (
                   <ActivityIndicator size="small" color={colors.white} />
                 ) : (
-                  <Text style={styles.buttonText}>Marcar como Pronto para Entrega</Text>
+                  <Text style={styles.buttonText}>
+                    Marcar como Pronto para Entrega
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -598,16 +678,15 @@ const EstablishmentOrderDetailsScreen: React.FC = () => {
 
           {(orderStatus === "pending" || orderStatus === "in_separation") && (
             <TouchableOpacity
-              style={[
-                styles.button,
-                styles.contactButton,
-                { backgroundColor: colors.warning },
-              ]}
-              onPress={() => console.log("Entrar em contato")}
+              style={[styles.button,styles.contactButton, {backgroundColor: colors.warning},]}
+              onPress={handleCallClient}
             >
-              <MaterialIcons name="phone" size={16} color={colors.white} />
-              <Text style={styles.buttonText}>Entrar em contato</Text>
+              <MaterialIcons name="phone" size={16} color="#FFFFFF" />
+              <Text style={styles.buttonText}>
+                Entrar em Contato
+              </Text>
             </TouchableOpacity>
+            
           )}
         </View>
       </ScrollView>
@@ -874,12 +953,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  rejectButton: {
-  },
-  acceptButton: {
-  },
-  primaryButton: {
-  },
+  rejectButton: {},
+  acceptButton: {},
+  primaryButton: {},
   contactButton: {
     flexDirection: "row",
     gap: 8,
