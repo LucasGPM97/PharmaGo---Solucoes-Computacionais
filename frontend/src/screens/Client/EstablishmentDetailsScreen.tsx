@@ -252,6 +252,8 @@ const EstablishmentDetails: React.FC<{ navigation: any }> = ({
           disponibilidade: apiProduct.disponibilidade,
           link_bula: apiProduct.produto.link_bula,
           apresentacao: apiProduct.produto.apresentacao || "",
+          tarja: apiProduct.produto.tarja || "",
+          tipo_produto: apiProduct.produto.tipo_produto || "",
         }));
 
       const buyAgainCategory: Category = {
