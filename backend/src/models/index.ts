@@ -11,13 +11,22 @@ import Pedido from "./Pedido";
 import ReceitaMedica from "./ReceitaMedica";
 import Carrinho from "./Carrinho";
 import CarrinhoItem from "./CarrinhoItem";
+import Catalogo from "./Catalogo";
+import HorarioFuncionamento from "./HorarioFuncionamento";
+import FarmaciaPermissoes from "./FarmaciaPermissoes";
+import SubstanciaControlada from "./SubstanciaControlada";
+import ProdutoSubstanciaControlada from "./ProdutoSubstanciaControlada";
+import PedidoItem from "./PedidoItem";
+import { setupAssociations } from "./associations";
 
 const syncDatabase = async () => {
   try {
+    await setupAssociations();
     await sequelize.sync({ alter: false });
     console.log("Database synchronized successfully.");
   } catch (error) {
     console.error("Error synchronizing database:", error);
+    throw error;
   }
 };
 
@@ -31,9 +40,15 @@ export {
   Estabelecimento,
   Produto,
   CatalogoProduto,
+  Catalogo,
   ImagemProduto,
   Pedido,
   ReceitaMedica,
   Carrinho,
   CarrinhoItem,
+  HorarioFuncionamento,
+  FarmaciaPermissoes,
+  SubstanciaControlada,
+  ProdutoSubstanciaControlada,
+  PedidoItem,
 };

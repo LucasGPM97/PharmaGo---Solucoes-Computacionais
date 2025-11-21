@@ -39,7 +39,4 @@ Carrinho.init(
   }
 );
 
-Carrinho.belongsTo(Cliente, { foreignKey: "cliente_idcliente", as: "cliente" });
-Cliente.hasOne(Carrinho, { foreignKey: "cliente_idcliente", as: "carrinho" });
-
 export default Carrinho;

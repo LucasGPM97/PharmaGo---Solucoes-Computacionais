@@ -75,13 +75,5 @@ EnderecoEstabelecimento.init(
     updatedAt: "updated_at",
   }
 );
-EnderecoEstabelecimento.belongsTo(Estabelecimento, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "estabelecimento",
-});
-Estabelecimento.hasOne(EnderecoEstabelecimento, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "endereco_estabelecimento",
-});
 
 export default EnderecoEstabelecimento;

@@ -33,18 +33,4 @@ ProdutoSubstanciaControlada.init(
   }
 );
 
-Produto.belongsToMany(SubstanciaControlada, {
-  through: ProdutoSubstanciaControlada,
-  foreignKey: "produto_idproduto",
-  otherKey: "substancia_controlada_idsubstancia_controlada",
-  as: "substancia_controlada",
-});
-
-SubstanciaControlada.belongsToMany(Produto, {
-  through: ProdutoSubstanciaControlada,
-  foreignKey: "substancia_controlada_idsubstancia_controlada",
-  otherKey: "produto_idproduto",
-  as: "produto",
-});
-
 export default ProdutoSubstanciaControlada;

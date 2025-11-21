@@ -52,13 +52,4 @@ FarmaciaPermissoes.init(
   }
 );
 
-FarmaciaPermissoes.belongsTo(Estabelecimento, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "estabelecimento",
-});
-Estabelecimento.hasMany(FarmaciaPermissoes, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "farmacia_permissoes",
-});
-
 export default FarmaciaPermissoes;

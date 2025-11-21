@@ -32,9 +32,4 @@ Catalogo.init(
   }
 );
 
-Catalogo.belongsTo(Estabelecimento, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "estabelecimento",
-});
-
 export default Catalogo;

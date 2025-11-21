@@ -35,13 +35,4 @@ ImagemProduto.init(
   }
 );
 
-ImagemProduto.belongsTo(Produto, {
-  foreignKey: "produto_idproduto",
-  as: "produto",
-});
-Produto.hasMany(ImagemProduto, {
-  foreignKey: "produto_idproduto",
-  as: "imagem_produto",
-});
-
 export default ImagemProduto;

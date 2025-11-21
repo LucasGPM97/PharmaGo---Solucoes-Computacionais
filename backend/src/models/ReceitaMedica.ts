@@ -45,13 +45,4 @@ ReceitaMedica.init(
   }
 );
 
-ReceitaMedica.belongsTo(Pedido, {
-  foreignKey: "pedido_idpedido",
-  as: "pedido",
-});
-Pedido.hasOne(ReceitaMedica, {
-  foreignKey: "pedido_idpedido",
-  as: "receita_medica",
-});
-
 export default ReceitaMedica;

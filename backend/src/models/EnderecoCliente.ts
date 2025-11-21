@@ -86,13 +86,5 @@ EnderecoCliente.init(
     updatedAt: "updated_at",
   }
 );
-EnderecoCliente.belongsTo(Cliente, {
-  foreignKey: "cliente_idcliente",
-  as: "cliente",
-});
-Cliente.hasMany(EnderecoCliente, {
-  foreignKey: "cliente_idcliente",
-  as: "endereco_cliente",
-});
 
 export default EnderecoCliente;

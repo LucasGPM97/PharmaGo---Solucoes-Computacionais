@@ -57,22 +57,5 @@ CatalogoProduto.init(
   }
 );
 
-CatalogoProduto.belongsTo(Catalogo, {
-  foreignKey: "catalogo_idcatalogo",
-  as: "catalogo",
-});
-Catalogo.hasMany(CatalogoProduto, {
-  foreignKey: "catalogo_idcatalogo",
-  as: "catalogo_produto",
-});
-
-CatalogoProduto.belongsTo(Produto, {
-  foreignKey: "produto_idproduto",
-  as: "produto",
-});
-Produto.hasMany(CatalogoProduto, {
-  foreignKey: "produto_idproduto",
-  as: "catalogo_produto",
-});
 
 export default CatalogoProduto;

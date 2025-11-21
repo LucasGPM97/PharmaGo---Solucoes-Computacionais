@@ -56,19 +56,4 @@ PedidoItem.init(
   }
 );
 
-PedidoItem.belongsTo(Pedido, { foreignKey: "pedido_idpedido", as: "pedido" });
-Pedido.hasMany(PedidoItem, {
-  foreignKey: "pedido_idpedido",
-  as: "pedido_itens",
-});
-
-PedidoItem.belongsTo(CatalogoProduto, {
-  foreignKey: "catalogo_produto_idcatalogo_produto",
-  as: "catalogo_produto",
-});
-CatalogoProduto.hasMany(PedidoItem, {
-  foreignKey: "catalogo_produto_idcatalogo_produto",
-  as: "catalogo_produto",
-});
-
 export default PedidoItem;

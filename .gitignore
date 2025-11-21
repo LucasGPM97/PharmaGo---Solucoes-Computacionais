@@ -19,7 +19,7 @@ dist/
 .metro-health-check*
 
 # Environment
-.env*
+.env
 *.pem
 *.jks
 *.p8

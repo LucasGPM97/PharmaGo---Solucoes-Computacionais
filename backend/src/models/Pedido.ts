@@ -72,34 +72,4 @@ Pedido.init(
   }
 );
 
-Pedido.belongsTo(Cliente, { foreignKey: "cliente_idcliente", as: "cliente" });
-Cliente.hasMany(Pedido, { foreignKey: "cliente_idcliente", as: "pedido" });
-
-Pedido.belongsTo(Estabelecimento, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "estabelecimento",
-});
-Estabelecimento.hasMany(Pedido, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "pedidos",
-});
-
-Pedido.belongsTo(EnderecoCliente, {
-  foreignKey: "endereco_cliente_idendereco_cliente",
-  as: "endereco_cliente",
-});
-EnderecoCliente.hasMany(Pedido, {
-  foreignKey: "endereco_cliente_idendereco_cliente",
-  as: "pedido",
-});
-
-Pedido.belongsTo(FormaPagamento, {
-  foreignKey: "forma_pagamento_idforma_pagamento",
-  as: "forma_pagamento",
-});
-FormaPagamento.hasMany(Pedido, {
-  foreignKey: "forma_pagamento_idforma_pagamento",
-  as: "pedido",
-});
-
 export default Pedido;

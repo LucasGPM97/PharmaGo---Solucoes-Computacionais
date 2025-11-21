@@ -52,13 +52,4 @@ HorarioFuncionamento.init(
   }
 );
 
-HorarioFuncionamento.belongsTo(Estabelecimento, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "estabelecimento",
-});
-Estabelecimento.hasMany(HorarioFuncionamento, {
-  foreignKey: "estabelecimento_idestabelecimento",
-  as: "horario_funcionamento",
-});
-
 export default HorarioFuncionamento;

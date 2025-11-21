@@ -46,14 +46,23 @@ app.use("/receitas-medicas", authMiddleware, receitaMedicaRoutes);
 app.use("/carrinho", authMiddleware, carrinhoRoutes);
 app.use("/horarios", authMiddleware, horarioFuncionamentoRoutes);
 
-const startServer = async () => {
-  await syncDatabase();
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+export const startServer = async () => {
+  try {
+    await syncDatabase();
+    
+    const PORT = process.env.PORT || 3000;
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+    return server;
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
 };
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export default app;

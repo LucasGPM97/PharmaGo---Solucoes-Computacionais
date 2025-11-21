@@ -46,22 +46,4 @@ CarrinhoItem.init(
   }
 );
 
-CarrinhoItem.belongsTo(Carrinho, {
-  foreignKey: "carrinho_idcarrinho",
-  as: "carrinho",
-});
-Carrinho.hasMany(CarrinhoItem, {
-  foreignKey: "carrinho_idcarrinho",
-  as: "carrinho_item",
-});
-
-CarrinhoItem.belongsTo(CatalogoProduto, {
-  foreignKey: "catalogo_produto_idcatalogo_produto",
-  as: "catalogo_produto",
-});
-CatalogoProduto.hasMany(CarrinhoItem, {
-  foreignKey: "catalogo_produto_idcatalogo_produto",
-  as: "carrinho_item",
-});
-
 export default CarrinhoItem;
